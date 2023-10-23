@@ -1,0 +1,885 @@
+openapi: 3.0.0
+info:
+  description: |
+    API for the sustaininty backend
+  title: Sustainity
+  version: 0.3.0
+servers:
+- url: /
+paths:
+  /:
+    get:
+      description: Service health check.
+      operationId: checkHealth
+      responses:
+        "200":
+          description: OK
+      summary: Health check
+  /search/text:
+    get:
+      description: Returns results of a search using a text query.
+      operationId: searchByText
+      parameters:
+      - description: Text query for search.
+        explode: true
+        in: query
+        name: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/shortString'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/textSearchResults'
+          description: OK
+      summary: Text search.
+  /library:
+    get:
+      description: Returns a list of summaries of all library items.
+      operationId: getLibrary
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/libraryContents'
+          description: OK
+      summary: Get library contents.
+  /library/{topic}:
+    get:
+      description: Returns a full library item.
+      operationId: getLibraryItem
+      parameters:
+      - description: Library topic.
+        explode: false
+        in: path
+        name: topic
+        required: true
+        schema:
+          $ref: '#/components/schemas/libraryTopic'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/libraryItemFull'
+          description: OK
+      summary: Get library item.
+  /organisation/{id}:
+    get:
+      description: Returns full info about a specified organisation.
+      operationId: getOrganisation
+      parameters:
+      - description: ID of a resource.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/id'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/organisationFull'
+          description: OK
+      summary: Get organisation.
+  /product/{id}:
+    get:
+      description: Returns full info about a specified product.
+      operationId: getProduct
+      parameters:
+      - description: ID of a resource.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/id'
+        style: simple
+      - description: Region code.
+        explode: true
+        in: query
+        name: region
+        required: false
+        schema:
+          $ref: '#/components/schemas/regionCode'
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/productFull'
+          description: OK
+      summary: Get product.
+  /product/{id}/alternatives:
+    get:
+      description: Returns a list of alternative products for each of products category.
+      operationId: getAlternatives
+      parameters:
+      - description: ID of a resource.
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          $ref: '#/components/schemas/id'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/categoryAlternatives'
+                type: array
+          description: OK
+      summary: Get product alternatives.
+components:
+  parameters:
+    id:
+      description: ID of a resource.
+      explode: false
+      in: path
+      name: id
+      required: true
+      schema:
+        $ref: '#/components/schemas/id'
+      style: simple
+    regionCode:
+      description: Region code.
+      explode: true
+      in: query
+      name: region
+      required: false
+      schema:
+        $ref: '#/components/schemas/regionCode'
+      style: form
+    libraryTopic:
+      description: Library topic.
+      explode: false
+      in: path
+      name: topic
+      required: true
+      schema:
+        $ref: '#/components/schemas/libraryTopic'
+      style: simple
+    query:
+      description: Text query for search.
+      explode: true
+      in: query
+      name: query
+      required: true
+      schema:
+        $ref: '#/components/schemas/shortString'
+      style: form
+  schemas:
+    id:
+      description: ID of a resource.
+      maxLength: 32
+      type: string
+    accuracy:
+      description: Match accuracy.
+      format: double
+      maximum: 1.0
+      minimum: 0.0
+      type: number
+    dataSource:
+      description: Describes where the related data was retrieved from.
+      enum:
+      - wiki
+      - "off"
+      - eu
+      type: string
+    symbol:
+      description: A single letter symbol.
+      maxLength: 1
+      minLength: 1
+      type: string
+    regionCode:
+      description: Code of a region.
+      maxLength: 2
+      minLength: 2
+      type: string
+    gtin:
+      description: Global Trade Item Number.
+      maxLength: 14
+      type: string
+    shortString:
+      description: "Short string for labels, titles, summaries..."
+      maxLength: 1024
+      type: string
+    longString:
+      description: "Long string for descriptions, articles..."
+      maxLength: 1048576
+      type: string
+    shortText:
+      description: Short text with its source.
+      example:
+        text: text
+        source: null
+      properties:
+        text:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - source
+      - text
+      type: object
+    longText:
+      description: Long text with its source.
+      example:
+        text: text
+        source: null
+      properties:
+        text:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - source
+      - text
+      type: object
+    image:
+      description: Image path/URL with its source.
+      example:
+        image: image
+        source: null
+      properties:
+        image:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - image
+      - source
+      type: object
+    presentationEntry:
+      description: An entry in a presentation.
+      example:
+        score: 0
+        name: name
+        id: id
+      properties:
+        id:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        name:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        score:
+          type: integer
+      required:
+      - id
+      - name
+      - score
+      type: object
+    presentation:
+      description: Additional data to present together with a library item.
+      example:
+        data:
+        - score: 0
+          name: name
+          id: id
+        - score: 0
+          name: name
+          id: id
+      properties:
+        data:
+          items:
+            $ref: '#/components/schemas/presentationEntry'
+          type: array
+      required:
+      - data
+      type: object
+    libraryTopic:
+      description: Name of a topic in the library.
+      enum:
+      - info:main
+      - info:for_producers
+      - info:faq
+      - data:wiki
+      - data:open_food_facts
+      - cert:bcorp
+      - cert:eu_ecolabel
+      - cert:tco
+      - cert:fti
+      - other:not_found
+      type: string
+    libraryItemShort:
+      description: Short summary of a library item.
+      example:
+        summary: summary
+        id: null
+        title: title
+      properties:
+        id:
+          $ref: '#/components/schemas/libraryTopic'
+        title:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        summary:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+      required:
+      - id
+      - summary
+      - title
+      type: object
+    libraryItemFull:
+      description: Full contents of a library item.
+      example:
+        summary: summary
+        presentation:
+          data:
+          - score: 0
+            name: name
+            id: id
+          - score: 0
+            name: name
+            id: id
+        id: null
+        title: title
+        article: article
+      properties:
+        id:
+          $ref: '#/components/schemas/libraryTopic'
+        title:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        summary:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        article:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        presentation:
+          $ref: '#/components/schemas/presentation'
+      required:
+      - article
+      - id
+      - summary
+      - title
+      type: object
+    libraryContents:
+      description: List of all items in the library.
+      example:
+        items:
+        - summary: summary
+          id: null
+          title: title
+        - summary: summary
+          id: null
+          title: title
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/libraryItemShort'
+          type: array
+      required:
+      - items
+      type: object
+    sustainityScoreBranch:
+      description: Part of explanation of calculation of the Sustainity score.
+      properties:
+        symbol:
+          description: A single letter symbol.
+          maxLength: 1
+          minLength: 1
+          type: string
+        description:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        weight:
+          type: integer
+        score:
+          format: double
+          type: number
+        branches:
+          items:
+            $ref: '#/components/schemas/sustainityScoreBranch'
+          type: array
+      required:
+      - decription
+      - score
+      - symbol
+      - weight
+      type: object
+    sustainityScore:
+      description: Explanation of calculation of the Sustainity score.
+      properties:
+        total:
+          format: double
+          type: number
+        tree:
+          items:
+            $ref: '#/components/schemas/sustainityScoreBranch'
+          type: array
+      required:
+      - total
+      - tree
+      type: object
+    badgeName:
+      description: Name of a badge.
+      enum:
+      - bcorp
+      - eu
+      - tco
+      type: string
+    scorerName:
+      description: Name of a scorer.
+      enum:
+      - fti
+      type: string
+    bCorpMedallion:
+      description: Details of BCorp evaluation.
+      properties:
+        medallionVariant:
+          type: string
+        id:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+      required:
+      - id
+      - medallionVariant
+      type: object
+    euEcolabelMedallion:
+      description: Details of EU Ecolabel evaluation.
+      properties:
+        medallionVariant:
+          type: string
+        matchAccuracy:
+          description: Match accuracy.
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+      required:
+      - matchAccuracy
+      - medallionVariant
+      type: object
+    ftiMedallion:
+      description: Details of Fashion Transparency Index evaluation.
+      properties:
+        medallionVariant:
+          type: string
+        score:
+          type: integer
+      required:
+      - medallionVariant
+      - score
+      type: object
+    sustainityMedallion:
+      description: Details of Sustainity evaluation.
+      properties:
+        medallionVariant:
+          type: string
+        score:
+          $ref: '#/components/schemas/sustainityScore'
+      required:
+      - medallionVariant
+      - score
+      type: object
+    tcoMedallion:
+      description: Details of TCO evaluation.
+      properties:
+        medallionVariant:
+          type: string
+        brandName:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+      required:
+      - brandName
+      - medallionVariant
+      type: object
+    medallion:
+      description: Combines data from any medallion.
+      discriminator:
+        propertyName: medallionVariant
+      oneOf:
+      - $ref: '#/components/schemas/bCorpMedallion'
+      - $ref: '#/components/schemas/euEcolabelMedallion'
+      - $ref: '#/components/schemas/ftiMedallion'
+      - $ref: '#/components/schemas/sustainityMedallion'
+      - $ref: '#/components/schemas/tcoMedallion'
+    organisationShort:
+      description: Extract from organisation data.
+      example:
+        badges:
+        - null
+        - null
+        organisationId: organisationId
+        scores:
+          key: 0
+        name: name
+        description: description
+      properties:
+        organisationId:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        name:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        description:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        badges:
+          items:
+            $ref: '#/components/schemas/badgeName'
+          type: array
+        scores:
+          additionalProperties:
+            type: integer
+          type: object
+      required:
+      - badges
+      - name
+      - organisationId
+      - scores
+      type: object
+    organisationFull:
+      description: Full organisation data.
+      example:
+        images:
+        - image: image
+          source: null
+        - image: image
+          source: null
+        organisationId: organisationId
+        names:
+        - text: text
+          source: null
+        - text: text
+          source: null
+        medallions:
+        - null
+        - null
+        websites:
+        - null
+        - null
+        descriptions:
+        - text: text
+          source: null
+        - text: text
+          source: null
+        products:
+        - badges:
+          - null
+          - null
+          productId: productId
+          scores:
+            key: 0
+          name: name
+          description: description
+        - badges:
+          - null
+          - null
+          productId: productId
+          scores:
+            key: 0
+          name: name
+          description: description
+      properties:
+        organisationId:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        names:
+          items:
+            $ref: '#/components/schemas/shortText'
+          type: array
+        descriptions:
+          items:
+            $ref: '#/components/schemas/longText'
+          type: array
+        images:
+          items:
+            $ref: '#/components/schemas/image'
+          type: array
+        websites:
+          items:
+            $ref: '#/components/schemas/shortString'
+          type: array
+        products:
+          items:
+            $ref: '#/components/schemas/productShort'
+          type: array
+        medallions:
+          items:
+            $ref: '#/components/schemas/medallion'
+          type: array
+      required:
+      - description
+      - images
+      - medallions
+      - name
+      - organisationId
+      - products
+      - websites
+      type: object
+    productShort:
+      description: Extract from product data.
+      example:
+        badges:
+        - null
+        - null
+        productId: productId
+        scores:
+          key: 0
+        name: name
+        description: description
+      properties:
+        productId:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        name:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        description:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        badges:
+          items:
+            $ref: '#/components/schemas/badgeName'
+          type: array
+        scores:
+          additionalProperties:
+            type: integer
+          type: object
+      required:
+      - badges
+      - name
+      - productId
+      - scores
+      type: object
+    productFull:
+      description: Full product data.
+      example:
+        gtins:
+        - null
+        - null
+        images:
+        - image: image
+          source: null
+        - image: image
+          source: null
+        names:
+        - text: text
+          source: null
+        - text: text
+          source: null
+        productId: productId
+        manufacturers:
+        - badges:
+          - null
+          - null
+          organisationId: organisationId
+          scores:
+            key: 0
+          name: name
+          description: description
+        - badges:
+          - null
+          - null
+          organisationId: organisationId
+          scores:
+            key: 0
+          name: name
+          description: description
+        medallions:
+        - null
+        - null
+        alternatives:
+        - alternatives:
+          - badges:
+            - null
+            - null
+            productId: productId
+            scores:
+              key: 0
+            name: name
+            description: description
+          - badges:
+            - null
+            - null
+            productId: productId
+            scores:
+              key: 0
+            name: name
+            description: description
+          category: category
+        - alternatives:
+          - badges:
+            - null
+            - null
+            productId: productId
+            scores:
+              key: 0
+            name: name
+            description: description
+          - badges:
+            - null
+            - null
+            productId: productId
+            scores:
+              key: 0
+            name: name
+            description: description
+          category: category
+        descriptions:
+        - text: text
+          source: null
+        - text: text
+          source: null
+      properties:
+        productId:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        gtins:
+          items:
+            $ref: '#/components/schemas/gtin'
+          type: array
+        names:
+          items:
+            $ref: '#/components/schemas/shortText'
+          type: array
+        descriptions:
+          items:
+            $ref: '#/components/schemas/longText'
+          type: array
+        images:
+          items:
+            $ref: '#/components/schemas/image'
+          type: array
+        manufacturers:
+          items:
+            $ref: '#/components/schemas/organisationShort'
+          type: array
+        alternatives:
+          items:
+            $ref: '#/components/schemas/categoryAlternatives'
+          type: array
+        medallions:
+          items:
+            $ref: '#/components/schemas/medallion'
+          type: array
+      required:
+      - alternatives
+      - images
+      - manufacturers
+      - medallions
+      - name
+      - productId
+      type: object
+    categoryAlternatives:
+      description: List of product alternative in the given category.
+      example:
+        alternatives:
+        - badges:
+          - null
+          - null
+          productId: productId
+          scores:
+            key: 0
+          name: name
+          description: description
+        - badges:
+          - null
+          - null
+          productId: productId
+          scores:
+            key: 0
+          name: name
+          description: description
+        category: category
+      properties:
+        category:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        alternatives:
+          items:
+            $ref: '#/components/schemas/productShort'
+          type: array
+      required:
+      - alternatives
+      - category
+      type: object
+    textSearchResultVariant:
+      description: Variant for text search result entry.
+      enum:
+      - product
+      - organisation
+      type: string
+    textSearchResult:
+      description: An entry in text search results.
+      example:
+        variant: null
+        id: id
+        label: label
+      properties:
+        variant:
+          $ref: '#/components/schemas/textSearchResultVariant'
+        id:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+        label:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+      required:
+      - id
+      - label
+      - variant
+      type: object
+    textSearchResults:
+      description: List of results of a text search.
+      example:
+        results:
+        - variant: null
+          id: id
+          label: label
+        - variant: null
+          id: id
+          label: label
+      properties:
+        results:
+          items:
+            $ref: '#/components/schemas/textSearchResult'
+          type: array
+      required:
+      - results
+      type: object
+
