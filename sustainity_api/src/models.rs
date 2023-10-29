@@ -1,5 +1,7 @@
 #![allow(unused_qualifications)]
 
+use validator::Validate;
+
 use crate::models;
 #[cfg(any(feature = "client", feature = "server"))]
 use crate::header;
@@ -36,7 +38,7 @@ impl std::ops::DerefMut for Accuracy {
 
 
 /// Details of BCorp evaluation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct BCorpMedallion {
     #[serde(rename = "medallionVariant")]
@@ -44,9 +46,13 @@ pub struct BCorpMedallion {
 
     /// ID of a resource.
     #[serde(rename = "id")]
+    #[validate(
+            length(max = 32),
+        )]
     pub id: String,
 
 }
+
 
 impl BCorpMedallion {
     #[allow(clippy::new_without_default)]
@@ -208,17 +214,21 @@ impl std::str::FromStr for BadgeName {
 }
 
 /// List of product alternative in the given category.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct CategoryAlternatives {
     /// Short string for labels, titles, summaries...
     #[serde(rename = "category")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub category: String,
 
     #[serde(rename = "alternatives")]
     pub alternatives: Vec<models::ProductShort>,
 
 }
+
 
 impl CategoryAlternatives {
     #[allow(clippy::new_without_default)]
@@ -377,7 +387,7 @@ impl std::str::FromStr for DataSource {
 }
 
 /// Details of EU Ecolabel evaluation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct EuEcolabelMedallion {
     #[serde(rename = "medallionVariant")]
@@ -385,9 +395,13 @@ pub struct EuEcolabelMedallion {
 
     /// Match accuracy.
     #[serde(rename = "matchAccuracy")]
+    #[validate(
+            range(min = 0.0, max = 1.0),
+        )]
     pub match_accuracy: f64,
 
 }
+
 
 impl EuEcolabelMedallion {
     #[allow(clippy::new_without_default)]
@@ -509,7 +523,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Details of Fashion Transparency Index evaluation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct FtiMedallion {
     #[serde(rename = "medallionVariant")]
@@ -519,6 +533,7 @@ pub struct FtiMedallion {
     pub score: i32,
 
 }
+
 
 impl FtiMedallion {
     #[allow(clippy::new_without_default)]
@@ -728,17 +743,21 @@ impl std::ops::DerefMut for Id {
 
 
 /// Image path/URL with its source.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Image {
     /// Short string for labels, titles, summaries...
     #[serde(rename = "image")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub image: String,
 
     #[serde(rename = "source")]
     pub source: models::DataSource,
 
 }
+
 
 impl Image {
     #[allow(clippy::new_without_default)]
@@ -858,13 +877,14 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// List of all items in the library.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LibraryContents {
     #[serde(rename = "items")]
     pub items: Vec<models::LibraryItemShort>,
 
 }
+
 
 impl LibraryContents {
     #[allow(clippy::new_without_default)]
@@ -974,7 +994,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Full contents of a library item.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LibraryItemFull {
     #[serde(rename = "id")]
@@ -982,14 +1002,23 @@ pub struct LibraryItemFull {
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "title")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub title: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "summary")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub summary: String,
 
     /// Long string for descriptions, articles...
     #[serde(rename = "article")]
+    #[validate(
+            length(max = 1048576),
+        )]
     pub article: String,
 
     #[serde(rename = "presentation")]
@@ -997,6 +1026,7 @@ pub struct LibraryItemFull {
     pub presentation: Option<models::Presentation>,
 
 }
+
 
 impl LibraryItemFull {
     #[allow(clippy::new_without_default)]
@@ -1141,7 +1171,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Short summary of a library item.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LibraryItemShort {
     #[serde(rename = "id")]
@@ -1149,13 +1179,20 @@ pub struct LibraryItemShort {
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "title")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub title: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "summary")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub summary: String,
 
 }
+
 
 impl LibraryItemShort {
     #[allow(clippy::new_without_default)]
@@ -1396,17 +1433,21 @@ impl std::ops::DerefMut for LongString {
 
 
 /// Long text with its source.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct LongText {
     /// Long string for descriptions, articles...
     #[serde(rename = "text")]
+    #[validate(
+            length(max = 1048576),
+        )]
     pub text: String,
 
     #[serde(rename = "source")]
     pub source: models::DataSource,
 
 }
+
 
 impl LongText {
     #[allow(clippy::new_without_default)]
@@ -1526,7 +1567,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Combines data from any medallion.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Medallion {
     #[serde(rename = "medallionVariant")]
@@ -1534,10 +1575,16 @@ pub struct Medallion {
 
     /// ID of a resource.
     #[serde(rename = "id")]
+    #[validate(
+            length(max = 32),
+        )]
     pub id: String,
 
     /// Match accuracy.
     #[serde(rename = "matchAccuracy")]
+    #[validate(
+            range(min = 0.0, max = 1.0),
+        )]
     pub match_accuracy: f64,
 
     #[serde(rename = "score")]
@@ -1545,9 +1592,13 @@ pub struct Medallion {
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "brandName")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub brand_name: String,
 
 }
+
 
 impl Medallion {
     #[allow(clippy::new_without_default)]
@@ -1694,11 +1745,14 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Full organisation data.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct OrganisationFull {
     /// ID of a resource.
     #[serde(rename = "organisationId")]
+    #[validate(
+            length(max = 32),
+        )]
     pub organisation_id: String,
 
     #[serde(rename = "names")]
@@ -1722,6 +1776,7 @@ pub struct OrganisationFull {
     pub medallions: Vec<models::Medallion>,
 
 }
+
 
 impl OrganisationFull {
     #[allow(clippy::new_without_default)]
@@ -1872,19 +1927,28 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Extract from organisation data.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct OrganisationShort {
     /// ID of a resource.
     #[serde(rename = "organisationId")]
+    #[validate(
+            length(max = 32),
+        )]
     pub organisation_id: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "name")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub name: String,
 
     /// Long string for descriptions, articles...
     #[serde(rename = "description")]
+    #[validate(
+            length(max = 1048576),
+        )]
     #[serde(skip_serializing_if="Option::is_none")]
     pub description: Option<String>,
 
@@ -1895,6 +1959,7 @@ pub struct OrganisationShort {
     pub scores: std::collections::HashMap<String, i32>,
 
 }
+
 
 impl OrganisationShort {
     #[allow(clippy::new_without_default)]
@@ -2041,13 +2106,14 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Additional data to present together with a library item.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Presentation {
     #[serde(rename = "data")]
     pub data: Vec<models::PresentationEntry>,
 
 }
+
 
 impl Presentation {
     #[allow(clippy::new_without_default)]
@@ -2157,21 +2223,28 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// An entry in a presentation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct PresentationEntry {
     /// ID of a resource.
     #[serde(rename = "id")]
+    #[validate(
+            length(max = 32),
+        )]
     pub id: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "name")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub name: String,
 
     #[serde(rename = "score")]
     pub score: i32,
 
 }
+
 
 impl PresentationEntry {
     #[allow(clippy::new_without_default)]
@@ -2302,11 +2375,14 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Full product data.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ProductFull {
     /// ID of a resource.
     #[serde(rename = "productId")]
+    #[validate(
+            length(max = 32),
+        )]
     pub product_id: String,
 
     #[serde(rename = "gtins")]
@@ -2334,6 +2410,7 @@ pub struct ProductFull {
     pub medallions: Vec<models::Medallion>,
 
 }
+
 
 impl ProductFull {
     #[allow(clippy::new_without_default)]
@@ -2494,19 +2571,28 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Extract from product data.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ProductShort {
     /// ID of a resource.
     #[serde(rename = "productId")]
+    #[validate(
+            length(max = 32),
+        )]
     pub product_id: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "name")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub name: String,
 
     /// Long string for descriptions, articles...
     #[serde(rename = "description")]
+    #[validate(
+            length(max = 1048576),
+        )]
     #[serde(skip_serializing_if="Option::is_none")]
     pub description: Option<String>,
 
@@ -2517,6 +2603,7 @@ pub struct ProductShort {
     pub scores: std::collections::HashMap<String, i32>,
 
 }
+
 
 impl ProductShort {
     #[allow(clippy::new_without_default)]
@@ -2783,17 +2870,21 @@ impl std::ops::DerefMut for ShortString {
 
 
 /// Short text with its source.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct ShortText {
     /// Short string for labels, titles, summaries...
     #[serde(rename = "text")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub text: String,
 
     #[serde(rename = "source")]
     pub source: models::DataSource,
 
 }
+
 
 impl ShortText {
     #[allow(clippy::new_without_default)]
@@ -2913,7 +3004,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Details of Sustainity evaluation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SustainityMedallion {
     #[serde(rename = "medallionVariant")]
@@ -2923,6 +3014,7 @@ pub struct SustainityMedallion {
     pub score: models::SustainityScore,
 
 }
+
 
 impl SustainityMedallion {
     #[allow(clippy::new_without_default)]
@@ -3042,7 +3134,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Explanation of calculation of the Sustainity score.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SustainityScore {
     #[serde(rename = "total")]
@@ -3052,6 +3144,7 @@ pub struct SustainityScore {
     pub tree: Vec<models::SustainityScoreBranch>,
 
 }
+
 
 impl SustainityScore {
     #[allow(clippy::new_without_default)]
@@ -3170,15 +3263,21 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// Part of explanation of calculation of the Sustainity score.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SustainityScoreBranch {
     /// A single letter symbol.
     #[serde(rename = "symbol")]
+    #[validate(
+            length(min = 1, max = 1),
+        )]
     pub symbol: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "description")]
+    #[validate(
+            length(max = 1024),
+        )]
     #[serde(skip_serializing_if="Option::is_none")]
     pub description: Option<String>,
 
@@ -3193,6 +3292,7 @@ pub struct SustainityScoreBranch {
     pub branches: Option<Vec<models::SustainityScoreBranch>>,
 
 }
+
 
 impl SustainityScoreBranch {
     #[allow(clippy::new_without_default)]
@@ -3386,7 +3486,7 @@ impl std::ops::DerefMut for Symbol {
 
 
 /// Details of TCO evaluation.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct TcoMedallion {
     #[serde(rename = "medallionVariant")]
@@ -3394,9 +3494,13 @@ pub struct TcoMedallion {
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "brandName")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub brand_name: String,
 
 }
+
 
 impl TcoMedallion {
     #[allow(clippy::new_without_default)]
@@ -3518,7 +3622,7 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 
 
 /// An entry in text search results.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct TextSearchResult {
     #[serde(rename = "variant")]
@@ -3526,13 +3630,20 @@ pub struct TextSearchResult {
 
     /// ID of a resource.
     #[serde(rename = "id")]
+    #[validate(
+            length(max = 32),
+        )]
     pub id: String,
 
     /// Short string for labels, titles, summaries...
     #[serde(rename = "label")]
+    #[validate(
+            length(max = 1024),
+        )]
     pub label: String,
 
 }
+
 
 impl TextSearchResult {
     #[allow(clippy::new_without_default)]
@@ -3697,13 +3808,14 @@ impl std::str::FromStr for TextSearchResultVariant {
 }
 
 /// List of results of a text search.
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct TextSearchResults {
     #[serde(rename = "results")]
     pub results: Vec<models::TextSearchResult>,
 
 }
+
 
 impl TextSearchResults {
     #[allow(clippy::new_without_default)]
