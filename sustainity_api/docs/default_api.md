@@ -38,7 +38,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getAlternatives**
-> Vec<models::CategoryAlternatives> getAlternatives(id)
+> Vec<models::CategoryAlternatives> getAlternatives(id, optional)
 Get product alternatives.
 
 Returns a list of alternative products for each of products category.
@@ -48,6 +48,15 @@ Returns a list of alternative products for each of products category.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
   **id** | **String**| ID of a resource. | 
+ **optional** | **map[string]interface{}** | optional parameters | nil if no parameters
+
+### Optional Parameters
+Optional parameters are passed through a map[string]interface{}.
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **id** | **String**| ID of a resource. | 
+ **region** | **String**| Region code. | 
 
 ### Return type
 

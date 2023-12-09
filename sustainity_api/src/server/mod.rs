@@ -194,8 +194,55 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                CheckHealthResponse::OK
+                                                CheckHealthResponse::Ok
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                 },
                                             },
@@ -235,8 +282,29 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
+                // Query parameters (note that non-required or collection query parameters will ignore garbage values, rather than causing a 400 response)
+                let query_params = form_urlencoded::parse(uri.query().unwrap_or_default().as_bytes()).collect::<Vec<_>>();
+                let param_region = query_params.iter().filter(|e| e.0 == "region").map(|e| e.1.clone())
+                    .next();
+                let param_region = match param_region {
+                    Some(param_region) => {
+                        let param_region =
+                            <String as std::str::FromStr>::from_str
+                                (&param_region);
+                        match param_region {
+                            Ok(param_region) => Some(param_region),
+                            Err(e) => return Ok(Response::builder()
+                                .status(StatusCode::BAD_REQUEST)
+                                .body(Body::from(format!("Couldn't parse query parameter region - doesn't match schema: {}", e)))
+                                .expect("Unable to create Bad Request response for invalid query parameter region")),
+                        }
+                    },
+                    None => None,
+                };
+
                                 let result = api_impl.get_alternatives(
                                             param_id,
+                                            param_region,
                                         &context
                                     ).await;
                                 let mut response = Response::new(Body::empty());
@@ -247,9 +315,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                GetAlternativesResponse::OK
-                                                    (body)
+                                                GetAlternativesResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -257,6 +372,57 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                             .expect("Unable to create Content-Type header for GET_ALTERNATIVES_OK"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+                                                },
+                                                GetAlternativesResponse::NotFound
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
                                             Err(_) => {
@@ -283,9 +449,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                GetLibraryResponse::OK
-                                                    (body)
+                                                GetLibraryResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -343,9 +556,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                GetLibraryItemResponse::OK
-                                                    (body)
+                                                GetLibraryItemResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -353,6 +613,57 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                             .expect("Unable to create Content-Type header for GET_LIBRARY_ITEM_OK"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+                                                },
+                                                GetLibraryItemResponse::NotFound
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
                                             Err(_) => {
@@ -403,9 +714,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                GetOrganisationResponse::OK
-                                                    (body)
+                                                GetOrganisationResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -413,6 +771,57 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                             .expect("Unable to create Content-Type header for GET_ORGANISATION_OK"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+                                                },
+                                                GetOrganisationResponse::NotFound
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
                                             Err(_) => {
@@ -484,9 +893,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                GetProductResponse::OK
-                                                    (body)
+                                                GetProductResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
@@ -494,6 +950,57 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                             .expect("Unable to create Content-Type header for GET_PRODUCT_OK"));
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+                                                },
+                                                GetProductResponse::NotFound
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
                                                 },
                                             },
                                             Err(_) => {
@@ -548,9 +1055,56 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
 
                                         match result {
                                             Ok(rsp) => match rsp {
-                                                SearchByTextResponse::OK
-                                                    (body)
+                                                SearchByTextResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
                                                 => {
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
                                                     *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,

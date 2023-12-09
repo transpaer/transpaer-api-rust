@@ -114,7 +114,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         &self,
         context: &C) -> Result<CheckHealthResponse, ApiError>
     {
-        let context = context.clone();
         info!("check_health() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
@@ -123,10 +122,10 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     async fn get_alternatives(
         &self,
         id: String,
+        region: Option<String>,
         context: &C) -> Result<GetAlternativesResponse, ApiError>
     {
-        let context = context.clone();
-        info!("get_alternatives(\"{}\") - X-Span-ID: {:?}", id, context.get().0.clone());
+        info!("get_alternatives(\"{}\", {:?}) - X-Span-ID: {:?}", id, region, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
 
@@ -135,7 +134,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         &self,
         context: &C) -> Result<GetLibraryResponse, ApiError>
     {
-        let context = context.clone();
         info!("get_library() - X-Span-ID: {:?}", context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
@@ -146,7 +144,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         topic: models::LibraryTopic,
         context: &C) -> Result<GetLibraryItemResponse, ApiError>
     {
-        let context = context.clone();
         info!("get_library_item({:?}) - X-Span-ID: {:?}", topic, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
@@ -157,7 +154,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         id: String,
         context: &C) -> Result<GetOrganisationResponse, ApiError>
     {
-        let context = context.clone();
         info!("get_organisation(\"{}\") - X-Span-ID: {:?}", id, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
@@ -169,7 +165,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         region: Option<String>,
         context: &C) -> Result<GetProductResponse, ApiError>
     {
-        let context = context.clone();
         info!("get_product(\"{}\", {:?}) - X-Span-ID: {:?}", id, region, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
@@ -180,7 +175,6 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         query: String,
         context: &C) -> Result<SearchByTextResponse, ApiError>
     {
-        let context = context.clone();
         info!("search_by_text(\"{}\") - X-Span-ID: {:?}", query, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }

@@ -89,7 +89,8 @@ fn main() {
         },
         Some("GetAlternatives") => {
             let result = rt.block_on(client.get_alternatives(
-                  "id_example".to_string()
+                  "id_example".to_string(),
+                  Some("region_example".to_string())
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },

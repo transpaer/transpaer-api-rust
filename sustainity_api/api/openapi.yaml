@@ -13,7 +13,14 @@ paths:
       operationId: checkHealth
       responses:
         "200":
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Health check
   /search/text:
     get:
@@ -34,7 +41,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/textSearchResults'
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Text search.
   /library:
     get:
@@ -46,7 +60,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/libraryContents'
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Get library contents.
   /library/{topic}:
     get:
@@ -67,7 +88,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/libraryItemFull'
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+        "404":
+          description: Not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Get library item.
   /organisation/{id}:
     get:
@@ -88,7 +125,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/organisationFull'
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+        "404":
+          description: Not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Get organisation.
   /product/{id}:
     get:
@@ -117,7 +170,23 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/productFull'
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+        "404":
+          description: Not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Get product.
   /product/{id}/alternatives:
     get:
@@ -132,6 +201,14 @@ paths:
         schema:
           $ref: '#/components/schemas/id'
         style: simple
+      - description: Region code.
+        explode: true
+        in: query
+        name: region
+        required: false
+        schema:
+          $ref: '#/components/schemas/regionCode'
+        style: form
       responses:
         "200":
           content:
@@ -140,9 +217,44 @@ paths:
                 items:
                   $ref: '#/components/schemas/categoryAlternatives'
                 type: array
-          description: OK
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+        "404":
+          description: Not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
       summary: Get product alternatives.
 components:
+  headers:
+    corsOrigin:
+      explode: false
+      required: true
+      schema:
+        type: string
+      style: simple
+    corsMethods:
+      explode: false
+      required: true
+      schema:
+        type: string
+      style: simple
+    corsHeaders:
+      explode: false
+      required: true
+      schema:
+        type: string
+      style: simple
   parameters:
     id:
       description: ID of a resource.
@@ -197,11 +309,6 @@ components:
       - wiki
       - "off"
       - eu
-      type: string
-    symbol:
-      description: A single letter symbol.
-      maxLength: 1
-      minLength: 1
       type: string
     regionCode:
       description: Code of a region.
@@ -400,18 +507,32 @@ components:
       required:
       - items
       type: object
+    sustainityScoreCategory:
+      description: Categories in the sustainity score
+      enum:
+      - dataAvailability
+      - producerKnown
+      - productionPlaceKnown
+      - idKnown
+      - categoryAssigned
+      - category
+      - warrantyLength
+      - numCerts
+      - atLeastOneCert
+      - atLeastTwoCerts
+      type: string
     sustainityScoreBranch:
       description: Part of explanation of calculation of the Sustainity score.
+      example:
+        score: 2.3021358869347655
+        weight: 5
+        category: null
+        branches:
+        - null
+        - null
       properties:
-        symbol:
-          description: A single letter symbol.
-          maxLength: 1
-          minLength: 1
-          type: string
-        description:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
-          type: string
+        category:
+          $ref: '#/components/schemas/sustainityScoreCategory'
         weight:
           type: integer
         score:
@@ -422,13 +543,28 @@ components:
             $ref: '#/components/schemas/sustainityScoreBranch'
           type: array
       required:
-      - decription
+      - branches
+      - category
       - score
-      - symbol
       - weight
       type: object
     sustainityScore:
       description: Explanation of calculation of the Sustainity score.
+      example:
+        total: 5.962133916683182
+        tree:
+        - score: 2.3021358869347655
+          weight: 5
+          category: null
+          branches:
+          - null
+          - null
+        - score: 2.3021358869347655
+          weight: 5
+          category: null
+          branches:
+          - null
+          - null
       properties:
         total:
           format: double
@@ -455,22 +591,21 @@ components:
       type: string
     bCorpMedallion:
       description: Details of BCorp evaluation.
+      example:
+        id: id
       properties:
-        medallionVariant:
-          type: string
         id:
           description: ID of a resource.
           maxLength: 32
           type: string
       required:
       - id
-      - medallionVariant
       type: object
     euEcolabelMedallion:
       description: Details of EU Ecolabel evaluation.
+      example:
+        matchAccuracy: 0.6027456183070403
       properties:
-        medallionVariant:
-          type: string
         matchAccuracy:
           description: Match accuracy.
           format: double
@@ -479,53 +614,106 @@ components:
           type: number
       required:
       - matchAccuracy
-      - medallionVariant
       type: object
     ftiMedallion:
       description: Details of Fashion Transparency Index evaluation.
+      example:
+        score: 1
       properties:
-        medallionVariant:
-          type: string
         score:
           type: integer
       required:
-      - medallionVariant
       - score
       type: object
     sustainityMedallion:
       description: Details of Sustainity evaluation.
+      example:
+        score:
+          total: 5.962133916683182
+          tree:
+          - score: 2.3021358869347655
+            weight: 5
+            category: null
+            branches:
+            - null
+            - null
+          - score: 2.3021358869347655
+            weight: 5
+            category: null
+            branches:
+            - null
+            - null
       properties:
-        medallionVariant:
-          type: string
         score:
           $ref: '#/components/schemas/sustainityScore'
       required:
-      - medallionVariant
       - score
       type: object
     tcoMedallion:
       description: Details of TCO evaluation.
+      example:
+        brandName: brandName
       properties:
-        medallionVariant:
-          type: string
         brandName:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
       required:
       - brandName
-      - medallionVariant
       type: object
+    medallionVariant:
+      description: Medallion variant.
+      enum:
+      - bCorp
+      - euEcolabel
+      - fti
+      - sustainity
+      - tco
+      type: string
     medallion:
       description: Combines data from any medallion.
-      discriminator:
-        propertyName: medallionVariant
-      oneOf:
-      - $ref: '#/components/schemas/bCorpMedallion'
-      - $ref: '#/components/schemas/euEcolabelMedallion'
-      - $ref: '#/components/schemas/ftiMedallion'
-      - $ref: '#/components/schemas/sustainityMedallion'
-      - $ref: '#/components/schemas/tcoMedallion'
+      example:
+        euEcolabel:
+          matchAccuracy: 0.6027456183070403
+        tco:
+          brandName: brandName
+        sustainity:
+          score:
+            total: 5.962133916683182
+            tree:
+            - score: 2.3021358869347655
+              weight: 5
+              category: null
+              branches:
+              - null
+              - null
+            - score: 2.3021358869347655
+              weight: 5
+              category: null
+              branches:
+              - null
+              - null
+        variant: null
+        fti:
+          score: 1
+        bcorp:
+          id: id
+      properties:
+        variant:
+          $ref: '#/components/schemas/medallionVariant'
+        bcorp:
+          $ref: '#/components/schemas/bCorpMedallion'
+        euEcolabel:
+          $ref: '#/components/schemas/euEcolabelMedallion'
+        fti:
+          $ref: '#/components/schemas/ftiMedallion'
+        sustainity:
+          $ref: '#/components/schemas/sustainityMedallion'
+        tco:
+          $ref: '#/components/schemas/tcoMedallion'
+      required:
+      - variant
+      type: object
     organisationShort:
       description: Extract from organisation data.
       example:
@@ -579,8 +767,56 @@ components:
         - text: text
           source: null
         medallions:
-        - null
-        - null
+        - euEcolabel:
+            matchAccuracy: 0.6027456183070403
+          tco:
+            brandName: brandName
+          sustainity:
+            score:
+              total: 5.962133916683182
+              tree:
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+          variant: null
+          fti:
+            score: 1
+          bcorp:
+            id: id
+        - euEcolabel:
+            matchAccuracy: 0.6027456183070403
+          tco:
+            brandName: brandName
+          sustainity:
+            score:
+              total: 5.962133916683182
+              tree:
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+          variant: null
+          fti:
+            score: 1
+          bcorp:
+            id: id
         websites:
         - null
         - null
@@ -717,8 +953,56 @@ components:
           name: name
           description: description
         medallions:
-        - null
-        - null
+        - euEcolabel:
+            matchAccuracy: 0.6027456183070403
+          tco:
+            brandName: brandName
+          sustainity:
+            score:
+              total: 5.962133916683182
+              tree:
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+          variant: null
+          fti:
+            score: 1
+          bcorp:
+            id: id
+        - euEcolabel:
+            matchAccuracy: 0.6027456183070403
+          tco:
+            brandName: brandName
+          sustainity:
+            score:
+              total: 5.962133916683182
+              tree:
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+              - score: 2.3021358869347655
+                weight: 5
+                category: null
+                branches:
+                - null
+                - null
+          variant: null
+          fti:
+            score: 1
+          bcorp:
+            id: id
         alternatives:
         - alternatives:
           - badges:

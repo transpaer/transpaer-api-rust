@@ -15,7 +15,7 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 0.3.0
-- Build date: 2023-10-29T15:02:40.094524+01:00[Europe/Amsterdam]
+- Build date: 2023-12-09T22:32:30.279885+01:00[Europe/Amsterdam]
 
 
 
@@ -129,6 +129,7 @@ Method | HTTP request | Description
  - [LongString](docs/LongString.md)
  - [LongText](docs/LongText.md)
  - [Medallion](docs/Medallion.md)
+ - [MedallionVariant](docs/MedallionVariant.md)
  - [OrganisationFull](docs/OrganisationFull.md)
  - [OrganisationShort](docs/OrganisationShort.md)
  - [Presentation](docs/Presentation.md)
@@ -142,7 +143,7 @@ Method | HTTP request | Description
  - [SustainityMedallion](docs/SustainityMedallion.md)
  - [SustainityScore](docs/SustainityScore.md)
  - [SustainityScoreBranch](docs/SustainityScoreBranch.md)
- - [Symbol](docs/Symbol.md)
+ - [SustainityScoreCategory](docs/SustainityScoreCategory.md)
  - [TcoMedallion](docs/TcoMedallion.md)
  - [TextSearchResult](docs/TextSearchResult.md)
  - [TextSearchResultVariant](docs/TextSearchResultVariant.md)
