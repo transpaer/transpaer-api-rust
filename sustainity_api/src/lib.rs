@@ -16,50 +16,176 @@ pub const API_VERSION: &str = "0.3.0";
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum CheckHealthResponse {
-    /// OK
-    OK
+    /// Ok
+    Ok
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
 pub enum GetAlternativesResponse {
-    /// OK
-    OK
-    (Vec<models::CategoryAlternatives>)
+    /// Ok
+    Ok
+    {
+        body: Vec<models::CategoryAlternatives>,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum GetLibraryResponse {
-    /// OK
-    OK
-    (models::LibraryContents)
+    /// Ok
+    Ok
+    {
+        body: models::LibraryContents,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
 pub enum GetLibraryItemResponse {
-    /// OK
-    OK
-    (models::LibraryItemFull)
+    /// Ok
+    Ok
+    {
+        body: models::LibraryItemFull,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
 pub enum GetOrganisationResponse {
-    /// OK
-    OK
-    (models::OrganisationFull)
+    /// Ok
+    Ok
+    {
+        body: models::OrganisationFull,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
 pub enum GetProductResponse {
-    /// OK
-    OK
-    (models::ProductFull)
+    /// Ok
+    Ok
+    {
+        body: models::ProductFull,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum SearchByTextResponse {
-    /// OK
-    OK
-    (models::TextSearchResults)
+    /// Ok
+    Ok
+    {
+        body: models::TextSearchResults,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
 }
 
 /// API
@@ -79,6 +205,7 @@ pub trait Api<C: Send + Sync> {
     async fn get_alternatives(
         &self,
         id: String,
+        region: Option<String>,
         context: &C) -> Result<GetAlternativesResponse, ApiError>;
 
     /// Get library contents.
@@ -131,6 +258,7 @@ pub trait ApiNoContext<C: Send + Sync> {
     async fn get_alternatives(
         &self,
         id: String,
+        region: Option<String>,
         ) -> Result<GetAlternativesResponse, ApiError>;
 
     /// Get library contents.
@@ -201,10 +329,11 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     async fn get_alternatives(
         &self,
         id: String,
+        region: Option<String>,
         ) -> Result<GetAlternativesResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().get_alternatives(id, &context).await
+        self.api().get_alternatives(id, region, &context).await
     }
 
     /// Get library contents.

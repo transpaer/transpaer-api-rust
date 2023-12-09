@@ -21,6 +21,7 @@ docs/LibraryTopic.md
 docs/LongString.md
 docs/LongText.md
 docs/Medallion.md
+docs/MedallionVariant.md
 docs/OrganisationFull.md
 docs/OrganisationShort.md
 docs/Presentation.md
@@ -34,7 +35,7 @@ docs/ShortText.md
 docs/SustainityMedallion.md
 docs/SustainityScore.md
 docs/SustainityScoreBranch.md
-docs/Symbol.md
+docs/SustainityScoreCategory.md
 docs/TcoMedallion.md
 docs/TextSearchResult.md
 docs/TextSearchResultVariant.md

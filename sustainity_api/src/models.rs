@@ -41,9 +41,6 @@ impl std::ops::DerefMut for Accuracy {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct BCorpMedallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
-
     /// ID of a resource.
     #[serde(rename = "id")]
     #[validate(
@@ -56,9 +53,8 @@ pub struct BCorpMedallion {
 
 impl BCorpMedallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, id: String, ) -> BCorpMedallion {
+    pub fn new(id: String, ) -> BCorpMedallion {
         BCorpMedallion {
-            medallion_variant,
             id,
         }
     }
@@ -70,10 +66,6 @@ impl BCorpMedallion {
 impl std::string::ToString for BCorpMedallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
-
 
             Some("id".to_string()),
             Some(self.id.to_string()),
@@ -95,7 +87,6 @@ impl std::str::FromStr for BCorpMedallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
             pub id: Vec<String>,
         }
 
@@ -115,8 +106,6 @@ impl std::str::FromStr for BCorpMedallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "id" => intermediate_rep.id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing BCorpMedallion".to_string())
                 }
@@ -128,7 +117,6 @@ impl std::str::FromStr for BCorpMedallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(BCorpMedallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in BCorpMedallion".to_string())?,
             id: intermediate_rep.id.into_iter().next().ok_or_else(|| "id missing in BCorpMedallion".to_string())?,
         })
     }
@@ -390,9 +378,6 @@ impl std::str::FromStr for DataSource {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct EuEcolabelMedallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
-
     /// Match accuracy.
     #[serde(rename = "matchAccuracy")]
     #[validate(
@@ -405,9 +390,8 @@ pub struct EuEcolabelMedallion {
 
 impl EuEcolabelMedallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, match_accuracy: f64, ) -> EuEcolabelMedallion {
+    pub fn new(match_accuracy: f64, ) -> EuEcolabelMedallion {
         EuEcolabelMedallion {
-            medallion_variant,
             match_accuracy,
         }
     }
@@ -419,10 +403,6 @@ impl EuEcolabelMedallion {
 impl std::string::ToString for EuEcolabelMedallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
-
 
             Some("matchAccuracy".to_string()),
             Some(self.match_accuracy.to_string()),
@@ -444,7 +424,6 @@ impl std::str::FromStr for EuEcolabelMedallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
             pub match_accuracy: Vec<f64>,
         }
 
@@ -464,8 +443,6 @@ impl std::str::FromStr for EuEcolabelMedallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "matchAccuracy" => intermediate_rep.match_accuracy.push(<f64 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing EuEcolabelMedallion".to_string())
                 }
@@ -477,7 +454,6 @@ impl std::str::FromStr for EuEcolabelMedallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(EuEcolabelMedallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in EuEcolabelMedallion".to_string())?,
             match_accuracy: intermediate_rep.match_accuracy.into_iter().next().ok_or_else(|| "matchAccuracy missing in EuEcolabelMedallion".to_string())?,
         })
     }
@@ -526,9 +502,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct FtiMedallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
-
     #[serde(rename = "score")]
     pub score: i32,
 
@@ -537,9 +510,8 @@ pub struct FtiMedallion {
 
 impl FtiMedallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, score: i32, ) -> FtiMedallion {
+    pub fn new(score: i32, ) -> FtiMedallion {
         FtiMedallion {
-            medallion_variant,
             score,
         }
     }
@@ -551,10 +523,6 @@ impl FtiMedallion {
 impl std::string::ToString for FtiMedallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
-
 
             Some("score".to_string()),
             Some(self.score.to_string()),
@@ -576,7 +544,6 @@ impl std::str::FromStr for FtiMedallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
             pub score: Vec<i32>,
         }
 
@@ -596,8 +563,6 @@ impl std::str::FromStr for FtiMedallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "score" => intermediate_rep.score.push(<i32 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing FtiMedallion".to_string())
                 }
@@ -609,7 +574,6 @@ impl std::str::FromStr for FtiMedallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(FtiMedallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in FtiMedallion".to_string())?,
             score: intermediate_rep.score.into_iter().next().ok_or_else(|| "score missing in FtiMedallion".to_string())?,
         })
     }
@@ -1570,45 +1534,42 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct Medallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
+    #[serde(rename = "variant")]
+    pub variant: models::MedallionVariant,
 
-    /// ID of a resource.
-    #[serde(rename = "id")]
-    #[validate(
-            length(max = 32),
-        )]
-    pub id: String,
+    #[serde(rename = "bcorp")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub bcorp: Option<models::BCorpMedallion>,
 
-    /// Match accuracy.
-    #[serde(rename = "matchAccuracy")]
-    #[validate(
-            range(min = 0.0, max = 1.0),
-        )]
-    pub match_accuracy: f64,
+    #[serde(rename = "euEcolabel")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub eu_ecolabel: Option<models::EuEcolabelMedallion>,
 
-    #[serde(rename = "score")]
-    pub score: models::SustainityScore,
+    #[serde(rename = "fti")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub fti: Option<models::FtiMedallion>,
 
-    /// Short string for labels, titles, summaries...
-    #[serde(rename = "brandName")]
-    #[validate(
-            length(max = 1024),
-        )]
-    pub brand_name: String,
+    #[serde(rename = "sustainity")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub sustainity: Option<models::SustainityMedallion>,
+
+    #[serde(rename = "tco")]
+    #[serde(skip_serializing_if="Option::is_none")]
+    pub tco: Option<models::TcoMedallion>,
 
 }
 
 
 impl Medallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, id: String, match_accuracy: f64, score: models::SustainityScore, brand_name: String, ) -> Medallion {
+    pub fn new(variant: models::MedallionVariant, ) -> Medallion {
         Medallion {
-            medallion_variant,
-            id,
-            match_accuracy,
-            score,
-            brand_name,
+            variant,
+            bcorp: None,
+            eu_ecolabel: None,
+            fti: None,
+            sustainity: None,
+            tco: None,
         }
     }
 }
@@ -1619,23 +1580,17 @@ impl Medallion {
 impl std::string::ToString for Medallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
+            // Skipping variant in query parameter serialization
 
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
+            // Skipping bcorp in query parameter serialization
 
+            // Skipping euEcolabel in query parameter serialization
 
-            Some("id".to_string()),
-            Some(self.id.to_string()),
+            // Skipping fti in query parameter serialization
 
+            // Skipping sustainity in query parameter serialization
 
-            Some("matchAccuracy".to_string()),
-            Some(self.match_accuracy.to_string()),
-
-            // Skipping score in query parameter serialization
-
-
-            Some("brandName".to_string()),
-            Some(self.brand_name.to_string()),
+            // Skipping tco in query parameter serialization
 
         ];
 
@@ -1654,11 +1609,12 @@ impl std::str::FromStr for Medallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
-            pub id: Vec<String>,
-            pub match_accuracy: Vec<f64>,
-            pub score: Vec<models::SustainityScore>,
-            pub brand_name: Vec<String>,
+            pub variant: Vec<models::MedallionVariant>,
+            pub bcorp: Vec<models::BCorpMedallion>,
+            pub eu_ecolabel: Vec<models::EuEcolabelMedallion>,
+            pub fti: Vec<models::FtiMedallion>,
+            pub sustainity: Vec<models::SustainityMedallion>,
+            pub tco: Vec<models::TcoMedallion>,
         }
 
         let mut intermediate_rep = IntermediateRep::default();
@@ -1677,15 +1633,17 @@ impl std::str::FromStr for Medallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "variant" => intermediate_rep.variant.push(<models::MedallionVariant as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "id" => intermediate_rep.id.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "bcorp" => intermediate_rep.bcorp.push(<models::BCorpMedallion as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "matchAccuracy" => intermediate_rep.match_accuracy.push(<f64 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "euEcolabel" => intermediate_rep.eu_ecolabel.push(<models::EuEcolabelMedallion as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "score" => intermediate_rep.score.push(<models::SustainityScore as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "fti" => intermediate_rep.fti.push(<models::FtiMedallion as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
-                    "brandName" => intermediate_rep.brand_name.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "sustainity" => intermediate_rep.sustainity.push(<models::SustainityMedallion as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    #[allow(clippy::redundant_clone)]
+                    "tco" => intermediate_rep.tco.push(<models::TcoMedallion as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing Medallion".to_string())
                 }
             }
@@ -1696,11 +1654,12 @@ impl std::str::FromStr for Medallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(Medallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in Medallion".to_string())?,
-            id: intermediate_rep.id.into_iter().next().ok_or_else(|| "id missing in Medallion".to_string())?,
-            match_accuracy: intermediate_rep.match_accuracy.into_iter().next().ok_or_else(|| "matchAccuracy missing in Medallion".to_string())?,
-            score: intermediate_rep.score.into_iter().next().ok_or_else(|| "score missing in Medallion".to_string())?,
-            brand_name: intermediate_rep.brand_name.into_iter().next().ok_or_else(|| "brandName missing in Medallion".to_string())?,
+            variant: intermediate_rep.variant.into_iter().next().ok_or_else(|| "variant missing in Medallion".to_string())?,
+            bcorp: intermediate_rep.bcorp.into_iter().next(),
+            eu_ecolabel: intermediate_rep.eu_ecolabel.into_iter().next(),
+            fti: intermediate_rep.fti.into_iter().next(),
+            sustainity: intermediate_rep.sustainity.into_iter().next(),
+            tco: intermediate_rep.tco.into_iter().next(),
         })
     }
 }
@@ -1743,6 +1702,54 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
     }
 }
 
+
+/// Medallion variant.
+/// Enumeration of values.
+/// Since this enum's variants do not hold data, we can easily define them as `#[repr(C)]`
+/// which helps with FFI.
+#[allow(non_camel_case_types)]
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
+pub enum MedallionVariant {
+    #[serde(rename = "bCorp")]
+    BCorp,
+    #[serde(rename = "euEcolabel")]
+    EuEcolabel,
+    #[serde(rename = "fti")]
+    Fti,
+    #[serde(rename = "sustainity")]
+    Sustainity,
+    #[serde(rename = "tco")]
+    Tco,
+}
+
+impl std::fmt::Display for MedallionVariant {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            MedallionVariant::BCorp => write!(f, "bCorp"),
+            MedallionVariant::EuEcolabel => write!(f, "euEcolabel"),
+            MedallionVariant::Fti => write!(f, "fti"),
+            MedallionVariant::Sustainity => write!(f, "sustainity"),
+            MedallionVariant::Tco => write!(f, "tco"),
+        }
+    }
+}
+
+impl std::str::FromStr for MedallionVariant {
+    type Err = String;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "bCorp" => std::result::Result::Ok(MedallionVariant::BCorp),
+            "euEcolabel" => std::result::Result::Ok(MedallionVariant::EuEcolabel),
+            "fti" => std::result::Result::Ok(MedallionVariant::Fti),
+            "sustainity" => std::result::Result::Ok(MedallionVariant::Sustainity),
+            "tco" => std::result::Result::Ok(MedallionVariant::Tco),
+            _ => std::result::Result::Err(format!("Value not valid: {}", s)),
+        }
+    }
+}
 
 /// Full organisation data.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
@@ -3007,9 +3014,6 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SustainityMedallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
-
     #[serde(rename = "score")]
     pub score: models::SustainityScore,
 
@@ -3018,9 +3022,8 @@ pub struct SustainityMedallion {
 
 impl SustainityMedallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, score: models::SustainityScore, ) -> SustainityMedallion {
+    pub fn new(score: models::SustainityScore, ) -> SustainityMedallion {
         SustainityMedallion {
-            medallion_variant,
             score,
         }
     }
@@ -3032,10 +3035,6 @@ impl SustainityMedallion {
 impl std::string::ToString for SustainityMedallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
-
             // Skipping score in query parameter serialization
 
         ];
@@ -3055,7 +3054,6 @@ impl std::str::FromStr for SustainityMedallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
             pub score: Vec<models::SustainityScore>,
         }
 
@@ -3075,8 +3073,6 @@ impl std::str::FromStr for SustainityMedallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "score" => intermediate_rep.score.push(<models::SustainityScore as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing SustainityMedallion".to_string())
                 }
@@ -3088,7 +3084,6 @@ impl std::str::FromStr for SustainityMedallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(SustainityMedallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in SustainityMedallion".to_string())?,
             score: intermediate_rep.score.into_iter().next().ok_or_else(|| "score missing in SustainityMedallion".to_string())?,
         })
     }
@@ -3266,20 +3261,8 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct SustainityScoreBranch {
-    /// A single letter symbol.
-    #[serde(rename = "symbol")]
-    #[validate(
-            length(min = 1, max = 1),
-        )]
-    pub symbol: String,
-
-    /// Short string for labels, titles, summaries...
-    #[serde(rename = "description")]
-    #[validate(
-            length(max = 1024),
-        )]
-    #[serde(skip_serializing_if="Option::is_none")]
-    pub description: Option<String>,
+    #[serde(rename = "category")]
+    pub category: models::SustainityScoreCategory,
 
     #[serde(rename = "weight")]
     pub weight: i32,
@@ -3288,21 +3271,19 @@ pub struct SustainityScoreBranch {
     pub score: f64,
 
     #[serde(rename = "branches")]
-    #[serde(skip_serializing_if="Option::is_none")]
-    pub branches: Option<Vec<models::SustainityScoreBranch>>,
+    pub branches: Vec<models::SustainityScoreBranch>,
 
 }
 
 
 impl SustainityScoreBranch {
     #[allow(clippy::new_without_default)]
-    pub fn new(symbol: String, weight: i32, score: f64, ) -> SustainityScoreBranch {
+    pub fn new(category: models::SustainityScoreCategory, weight: i32, score: f64, branches: Vec<models::SustainityScoreBranch>, ) -> SustainityScoreBranch {
         SustainityScoreBranch {
-            symbol,
-            description: None,
+            category,
             weight,
             score,
-            branches: None,
+            branches,
         }
     }
 }
@@ -3313,17 +3294,7 @@ impl SustainityScoreBranch {
 impl std::string::ToString for SustainityScoreBranch {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("symbol".to_string()),
-            Some(self.symbol.to_string()),
-
-
-            self.description.as_ref().map(|description| {
-                vec![
-                    "description".to_string(),
-                    description.to_string(),
-                ].join(",")
-            }),
+            // Skipping category in query parameter serialization
 
 
             Some("weight".to_string()),
@@ -3352,8 +3323,7 @@ impl std::str::FromStr for SustainityScoreBranch {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub symbol: Vec<String>,
-            pub description: Vec<String>,
+            pub category: Vec<models::SustainityScoreCategory>,
             pub weight: Vec<i32>,
             pub score: Vec<f64>,
             pub branches: Vec<Vec<models::SustainityScoreBranch>>,
@@ -3375,9 +3345,7 @@ impl std::str::FromStr for SustainityScoreBranch {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "symbol" => intermediate_rep.symbol.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
-                    "description" => intermediate_rep.description.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
+                    "category" => intermediate_rep.category.push(<models::SustainityScoreCategory as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
                     "weight" => intermediate_rep.weight.push(<i32 as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     #[allow(clippy::redundant_clone)]
@@ -3393,11 +3361,10 @@ impl std::str::FromStr for SustainityScoreBranch {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(SustainityScoreBranch {
-            symbol: intermediate_rep.symbol.into_iter().next().ok_or_else(|| "symbol missing in SustainityScoreBranch".to_string())?,
-            description: intermediate_rep.description.into_iter().next(),
+            category: intermediate_rep.category.into_iter().next().ok_or_else(|| "category missing in SustainityScoreBranch".to_string())?,
             weight: intermediate_rep.weight.into_iter().next().ok_or_else(|| "weight missing in SustainityScoreBranch".to_string())?,
             score: intermediate_rep.score.into_iter().next().ok_or_else(|| "score missing in SustainityScoreBranch".to_string())?,
-            branches: intermediate_rep.branches.into_iter().next(),
+            branches: intermediate_rep.branches.into_iter().next().ok_or_else(|| "branches missing in SustainityScoreBranch".to_string())?,
         })
     }
 }
@@ -3441,57 +3408,78 @@ impl std::convert::TryFrom<hyper::header::HeaderValue> for header::IntoHeaderVal
 }
 
 
-/// A single letter symbol.
-#[derive(Debug, Clone, PartialEq, PartialOrd, serde::Serialize, serde::Deserialize)]
-#[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
-pub struct Symbol(String);
+/// Categories in the sustainity score
+/// Enumeration of values.
+/// Since this enum's variants do not hold data, we can easily define them as `#[repr(C)]`
+/// which helps with FFI.
+#[allow(non_camel_case_types)]
+#[repr(C)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, serde::Serialize, serde::Deserialize)]
+#[cfg_attr(feature = "conversion", derive(frunk_enum_derive::LabelledGenericEnum))]
+pub enum SustainityScoreCategory {
+    #[serde(rename = "dataAvailability")]
+    DataAvailability,
+    #[serde(rename = "producerKnown")]
+    ProducerKnown,
+    #[serde(rename = "productionPlaceKnown")]
+    ProductionPlaceKnown,
+    #[serde(rename = "idKnown")]
+    IdKnown,
+    #[serde(rename = "categoryAssigned")]
+    CategoryAssigned,
+    #[serde(rename = "category")]
+    Category,
+    #[serde(rename = "warrantyLength")]
+    WarrantyLength,
+    #[serde(rename = "numCerts")]
+    NumCerts,
+    #[serde(rename = "atLeastOneCert")]
+    AtLeastOneCert,
+    #[serde(rename = "atLeastTwoCerts")]
+    AtLeastTwoCerts,
+}
 
-impl std::convert::From<String> for Symbol {
-    fn from(x: String) -> Self {
-        Symbol(x)
+impl std::fmt::Display for SustainityScoreCategory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match *self {
+            SustainityScoreCategory::DataAvailability => write!(f, "dataAvailability"),
+            SustainityScoreCategory::ProducerKnown => write!(f, "producerKnown"),
+            SustainityScoreCategory::ProductionPlaceKnown => write!(f, "productionPlaceKnown"),
+            SustainityScoreCategory::IdKnown => write!(f, "idKnown"),
+            SustainityScoreCategory::CategoryAssigned => write!(f, "categoryAssigned"),
+            SustainityScoreCategory::Category => write!(f, "category"),
+            SustainityScoreCategory::WarrantyLength => write!(f, "warrantyLength"),
+            SustainityScoreCategory::NumCerts => write!(f, "numCerts"),
+            SustainityScoreCategory::AtLeastOneCert => write!(f, "atLeastOneCert"),
+            SustainityScoreCategory::AtLeastTwoCerts => write!(f, "atLeastTwoCerts"),
+        }
     }
 }
 
-impl std::string::ToString for Symbol {
-    fn to_string(&self) -> String {
-       self.0.to_string()
+impl std::str::FromStr for SustainityScoreCategory {
+    type Err = String;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        match s {
+            "dataAvailability" => std::result::Result::Ok(SustainityScoreCategory::DataAvailability),
+            "producerKnown" => std::result::Result::Ok(SustainityScoreCategory::ProducerKnown),
+            "productionPlaceKnown" => std::result::Result::Ok(SustainityScoreCategory::ProductionPlaceKnown),
+            "idKnown" => std::result::Result::Ok(SustainityScoreCategory::IdKnown),
+            "categoryAssigned" => std::result::Result::Ok(SustainityScoreCategory::CategoryAssigned),
+            "category" => std::result::Result::Ok(SustainityScoreCategory::Category),
+            "warrantyLength" => std::result::Result::Ok(SustainityScoreCategory::WarrantyLength),
+            "numCerts" => std::result::Result::Ok(SustainityScoreCategory::NumCerts),
+            "atLeastOneCert" => std::result::Result::Ok(SustainityScoreCategory::AtLeastOneCert),
+            "atLeastTwoCerts" => std::result::Result::Ok(SustainityScoreCategory::AtLeastTwoCerts),
+            _ => std::result::Result::Err(format!("Value not valid: {}", s)),
+        }
     }
 }
-
-impl std::str::FromStr for Symbol {
-    type Err = std::string::ParseError;
-    fn from_str(x: &str) -> std::result::Result<Self, Self::Err> {
-        std::result::Result::Ok(Symbol(x.to_string()))
-    }
-}
-
-impl std::convert::From<Symbol> for String {
-    fn from(x: Symbol) -> Self {
-        x.0
-    }
-}
-
-impl std::ops::Deref for Symbol {
-    type Target = String;
-    fn deref(&self) -> &String {
-        &self.0
-    }
-}
-
-impl std::ops::DerefMut for Symbol {
-    fn deref_mut(&mut self) -> &mut String {
-        &mut self.0
-    }
-}
-
 
 /// Details of TCO evaluation.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize, validator::Validate)]
 #[cfg_attr(feature = "conversion", derive(frunk::LabelledGeneric))]
 pub struct TcoMedallion {
-    #[serde(rename = "medallionVariant")]
-    pub medallion_variant: String,
-
     /// Short string for labels, titles, summaries...
     #[serde(rename = "brandName")]
     #[validate(
@@ -3504,9 +3492,8 @@ pub struct TcoMedallion {
 
 impl TcoMedallion {
     #[allow(clippy::new_without_default)]
-    pub fn new(medallion_variant: String, brand_name: String, ) -> TcoMedallion {
+    pub fn new(brand_name: String, ) -> TcoMedallion {
         TcoMedallion {
-            medallion_variant,
             brand_name,
         }
     }
@@ -3518,10 +3505,6 @@ impl TcoMedallion {
 impl std::string::ToString for TcoMedallion {
     fn to_string(&self) -> String {
         let params: Vec<Option<String>> = vec![
-
-            Some("medallionVariant".to_string()),
-            Some(self.medallion_variant.to_string()),
-
 
             Some("brandName".to_string()),
             Some(self.brand_name.to_string()),
@@ -3543,7 +3526,6 @@ impl std::str::FromStr for TcoMedallion {
         #[derive(Default)]
         #[allow(dead_code)]
         struct IntermediateRep {
-            pub medallion_variant: Vec<String>,
             pub brand_name: Vec<String>,
         }
 
@@ -3563,8 +3545,6 @@ impl std::str::FromStr for TcoMedallion {
                 #[allow(clippy::match_single_binding)]
                 match key {
                     #[allow(clippy::redundant_clone)]
-                    "medallionVariant" => intermediate_rep.medallion_variant.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
-                    #[allow(clippy::redundant_clone)]
                     "brandName" => intermediate_rep.brand_name.push(<String as std::str::FromStr>::from_str(val).map_err(|x| x.to_string())?),
                     _ => return std::result::Result::Err("Unexpected key while parsing TcoMedallion".to_string())
                 }
@@ -3576,7 +3556,6 @@ impl std::str::FromStr for TcoMedallion {
 
         // Use the intermediate representation to return the struct
         std::result::Result::Ok(TcoMedallion {
-            medallion_variant: intermediate_rep.medallion_variant.into_iter().next().ok_or_else(|| "medallionVariant missing in TcoMedallion".to_string())?,
             brand_name: intermediate_rep.brand_name.into_iter().next().ok_or_else(|| "brandName missing in TcoMedallion".to_string())?,
         })
     }
