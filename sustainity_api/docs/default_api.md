@@ -8,8 +8,8 @@ Method | HTTP request | Description
 **getAlternatives**](default_api.md#getAlternatives) | **GET** /product/{id}/alternatives | Get product alternatives.
 **getLibrary**](default_api.md#getLibrary) | **GET** /library | Get library contents.
 **getLibraryItem**](default_api.md#getLibraryItem) | **GET** /library/{topic} | Get library item.
-**getOrganisation**](default_api.md#getOrganisation) | **GET** /organisation/{id} | Get organisation.
-**getProduct**](default_api.md#getProduct) | **GET** /product/{id} | Get product.
+**getOrganisation**](default_api.md#getOrganisation) | **GET** /organisation/{organisationIdVariant}:{id} | Get organisation.
+**getProduct**](default_api.md#getProduct) | **GET** /product/{productIdVariant}:{id} | Get product.
 **searchByText**](default_api.md#searchByText) | **GET** /search/text | Text search.
 
 
@@ -125,7 +125,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getOrganisation**
-> models::OrganisationFull getOrganisation(id)
+> models::OrganisationFull getOrganisation(organisation_id_variant, id)
 Get organisation.
 
 Returns full info about a specified organisation.
@@ -134,6 +134,7 @@ Returns full info about a specified organisation.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+  **organisation_id_variant** | [****](.md)| Variant of an organisation ID. | 
   **id** | **String**| ID of a resource. | 
 
 ### Return type
@@ -152,7 +153,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **getProduct**
-> models::ProductFull getProduct(id, optional)
+> models::ProductFull getProduct(product_id_variant, id, optional)
 Get product.
 
 Returns full info about a specified product.
@@ -161,6 +162,7 @@ Returns full info about a specified product.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+  **product_id_variant** | [****](.md)| Variant of a product ID. | 
   **id** | **String**| ID of a resource. | 
  **optional** | **map[string]interface{}** | optional parameters | nil if no parameters
 
@@ -169,6 +171,7 @@ Optional parameters are passed through a map[string]interface{}.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
+ **product_id_variant** | [****](.md)| Variant of a product ID. | 
  **id** | **String**| ID of a resource. | 
  **region** | **String**| Region code. | 
 

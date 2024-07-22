@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | **String** | ID of a resource. | 
+**wiki_id** | **String** | ID of a resource. | 
 **name** | **String** | Short string for labels, titles, summaries... | 
 **score** | **i32** |  | 
 

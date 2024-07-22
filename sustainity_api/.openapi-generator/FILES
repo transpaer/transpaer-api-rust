@@ -11,7 +11,6 @@ docs/CategoryAlternatives.md
 docs/DataSource.md
 docs/EuEcolabelMedallion.md
 docs/FtiMedallion.md
-docs/Gtin.md
 docs/Id.md
 docs/Image.md
 docs/LibraryContents.md
@@ -23,12 +22,17 @@ docs/LongText.md
 docs/Medallion.md
 docs/MedallionVariant.md
 docs/OrganisationFull.md
+docs/OrganisationIdVariant.md
+docs/OrganisationIds.md
 docs/OrganisationShort.md
 docs/Presentation.md
 docs/PresentationEntry.md
 docs/ProductFull.md
+docs/ProductIdVariant.md
+docs/ProductIds.md
 docs/ProductShort.md
 docs/RegionCode.md
+docs/Score.md
 docs/ScorerName.md
 docs/ShortString.md
 docs/ShortText.md
@@ -37,8 +41,8 @@ docs/SustainityScore.md
 docs/SustainityScoreBranch.md
 docs/SustainityScoreCategory.md
 docs/TcoMedallion.md
+docs/TextSearchLinkHack.md
 docs/TextSearchResult.md
-docs/TextSearchResultVariant.md
 docs/TextSearchResults.md
 docs/default_api.md
 examples/ca.pem

@@ -3,10 +3,9 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**product_id** | **String** | ID of a resource. | 
-**gtins** | **Vec<models::Gtin>** |  | [optional] [default to None]
-**names** | [**Vec<models::ShortText>**](shortText.md) |  | [optional] [default to None]
-**descriptions** | [**Vec<models::LongText>**](longText.md) |  | [optional] [default to None]
+**product_ids** | [***models::ProductIds**](productIds.md) |  | 
+**names** | [**Vec<models::ShortText>**](shortText.md) |  | 
+**descriptions** | [**Vec<models::LongText>**](longText.md) |  | 
 **images** | [**Vec<models::Image>**](image.md) |  | 
 **manufacturers** | [**Vec<models::OrganisationShort>**](organisationShort.md) |  | 
 **alternatives** | [**Vec<models::CategoryAlternatives>**](categoryAlternatives.md) |  | 

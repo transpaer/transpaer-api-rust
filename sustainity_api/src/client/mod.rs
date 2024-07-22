@@ -988,13 +988,15 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn get_organisation(
         &self,
+        param_organisation_id_variant: models::OrganisationIdVariant,
         param_id: String,
         context: &C) -> Result<GetOrganisationResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
         let mut uri = format!(
-            "{}/organisation/{id}",
+            "{}/organisation/{organisation_id_variant}:{id}",
             self.base_path
+            ,organisation_id_variant=utf8_percent_encode(&param_organisation_id_variant.to_string(), ID_ENCODE_SET)
             ,id=utf8_percent_encode(&param_id.to_string(), ID_ENCODE_SET)
         );
 
@@ -1166,14 +1168,16 @@ impl<S, C> Api<C> for Client<S, C> where
 
     async fn get_product(
         &self,
+        param_product_id_variant: models::ProductIdVariant,
         param_id: String,
         param_region: Option<String>,
         context: &C) -> Result<GetProductResponse, ApiError>
     {
         let mut client_service = self.client_service.clone();
         let mut uri = format!(
-            "{}/product/{id}",
+            "{}/product/{product_id_variant}:{id}",
             self.base_path
+            ,product_id_variant=utf8_percent_encode(&param_product_id_variant.to_string(), ID_ENCODE_SET)
             ,id=utf8_percent_encode(&param_id.to_string(), ID_ENCODE_SET)
         );
 
