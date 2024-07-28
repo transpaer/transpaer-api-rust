@@ -1,6 +1,6 @@
 #![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, non_camel_case_types)]
 #![allow(unused_imports, unused_attributes)]
-#![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
+#![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names, clippy::too_many_arguments)]
 
 use async_trait::async_trait;
 use futures::Stream;
@@ -12,7 +12,7 @@ use serde::{Serialize, Deserialize};
 type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 
 pub const BASE_PATH: &str = "";
-pub const API_VERSION: &str = "0.3.0";
+pub const API_VERSION: &str = "0.4.0";
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum CheckHealthResponse {
@@ -222,12 +222,14 @@ pub trait Api<C: Send + Sync> {
     /// Get organisation.
     async fn get_organisation(
         &self,
+        organisation_id_variant: models::OrganisationIdVariant,
         id: String,
         context: &C) -> Result<GetOrganisationResponse, ApiError>;
 
     /// Get product.
     async fn get_product(
         &self,
+        product_id_variant: models::ProductIdVariant,
         id: String,
         region: Option<String>,
         context: &C) -> Result<GetProductResponse, ApiError>;
@@ -275,12 +277,14 @@ pub trait ApiNoContext<C: Send + Sync> {
     /// Get organisation.
     async fn get_organisation(
         &self,
+        organisation_id_variant: models::OrganisationIdVariant,
         id: String,
         ) -> Result<GetOrganisationResponse, ApiError>;
 
     /// Get product.
     async fn get_product(
         &self,
+        product_id_variant: models::ProductIdVariant,
         id: String,
         region: Option<String>,
         ) -> Result<GetProductResponse, ApiError>;
@@ -358,22 +362,24 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     /// Get organisation.
     async fn get_organisation(
         &self,
+        organisation_id_variant: models::OrganisationIdVariant,
         id: String,
         ) -> Result<GetOrganisationResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().get_organisation(id, &context).await
+        self.api().get_organisation(organisation_id_variant, id, &context).await
     }
 
     /// Get product.
     async fn get_product(
         &self,
+        product_id_variant: models::ProductIdVariant,
         id: String,
         region: Option<String>,
         ) -> Result<GetProductResponse, ApiError>
     {
         let context = self.context().clone();
-        self.api().get_product(id, region, &context).await
+        self.api().get_product(product_id_variant, id, region, &context).await
     }
 
     /// Text search.

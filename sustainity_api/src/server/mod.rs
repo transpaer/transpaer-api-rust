@@ -39,9 +39,9 @@ mod paths {
             r"^/$",
             r"^/library$",
             r"^/library/(?P<topic>[^/?#]*)$",
-            r"^/organisation/(?P<id>[^/?#]*)$",
-            r"^/product/(?P<id>[^/?#]*)$",
+            r"^/organisation/(?P<organisationIdVariant>[^/?#]*):(?P<id>[^/?#]*)$",
             r"^/product/(?P<id>[^/?#]*)/alternatives$",
+            r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)$",
             r"^/search/text$"
         ])
         .expect("Unable to create global regex set");
@@ -55,26 +55,26 @@ mod paths {
             regex::Regex::new(r"^/library/(?P<topic>[^/?#]*)$")
                 .expect("Unable to create regex for LIBRARY_TOPIC");
     }
-    pub(crate) static ID_ORGANISATION_ID: usize = 3;
+    pub(crate) static ID_ORGANISATION_ORGANISATIONIDVARIANTID: usize = 3;
     lazy_static! {
-        pub static ref REGEX_ORGANISATION_ID: regex::Regex =
+        pub static ref REGEX_ORGANISATION_ORGANISATIONIDVARIANTID: regex::Regex =
             #[allow(clippy::invalid_regex)]
-            regex::Regex::new(r"^/organisation/(?P<id>[^/?#]*)$")
-                .expect("Unable to create regex for ORGANISATION_ID");
+            regex::Regex::new(r"^/organisation/(?P<organisationIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
+                .expect("Unable to create regex for ORGANISATION_ORGANISATIONIDVARIANTID");
     }
-    pub(crate) static ID_PRODUCT_ID: usize = 4;
-    lazy_static! {
-        pub static ref REGEX_PRODUCT_ID: regex::Regex =
-            #[allow(clippy::invalid_regex)]
-            regex::Regex::new(r"^/product/(?P<id>[^/?#]*)$")
-                .expect("Unable to create regex for PRODUCT_ID");
-    }
-    pub(crate) static ID_PRODUCT_ID_ALTERNATIVES: usize = 5;
+    pub(crate) static ID_PRODUCT_ID_ALTERNATIVES: usize = 4;
     lazy_static! {
         pub static ref REGEX_PRODUCT_ID_ALTERNATIVES: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/product/(?P<id>[^/?#]*)/alternatives$")
                 .expect("Unable to create regex for PRODUCT_ID_ALTERNATIVES");
+    }
+    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANTID: usize = 5;
+    lazy_static! {
+        pub static ref REGEX_PRODUCT_PRODUCTIDVARIANTID: regex::Regex =
+            #[allow(clippy::invalid_regex)]
+            regex::Regex::new(r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
+                .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANTID");
     }
     pub(crate) static ID_SEARCH_TEXT: usize = 6;
 }
@@ -112,7 +112,7 @@ impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
     }
 
     fn call(&mut self, target: Target) -> Self::Future {
-        futures::future::ok(Service::new(
+        future::ok(Service::new(
             self.api_impl.clone(),
         ))
     }
@@ -370,8 +370,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for GET_ALTERNATIVES_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                                 GetAlternativesResponse::NotFound
                                                     {
@@ -504,8 +504,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for GET_LIBRARY_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                             },
                                             Err(_) => {
@@ -611,8 +611,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for GET_LIBRARY_ITEM_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                                 GetLibraryItemResponse::NotFound
                                                     {
@@ -677,16 +677,30 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         Ok(response)
             },
 
-            // GetOrganisation - GET /organisation/{id}
-            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ID) => {
+            // GetOrganisation - GET /organisation/{organisationIdVariant}:{id}
+            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => {
                 // Path parameters
                 let path: &str = uri.path();
                 let path_params =
-                    paths::REGEX_ORGANISATION_ID
+                    paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANTID
                     .captures(path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE ORGANISATION_ID in set but failed match against \"{}\"", path, paths::REGEX_ORGANISATION_ID.as_str())
+                        panic!("Path {} matched RE ORGANISATION_ORGANISATIONIDVARIANTID in set but failed match against \"{}\"", path, paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANTID.as_str())
                     );
+
+                let param_organisation_id_variant = match percent_encoding::percent_decode(path_params["organisationIdVariant"].as_bytes()).decode_utf8() {
+                    Ok(param_organisation_id_variant) => match param_organisation_id_variant.parse::<models::OrganisationIdVariant>() {
+                        Ok(param_organisation_id_variant) => param_organisation_id_variant,
+                        Err(e) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't parse path parameter organisationIdVariant: {}", e)))
+                                        .expect("Unable to create Bad Request response for invalid path parameter")),
+                    },
+                    Err(_) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["organisationIdVariant"])))
+                                        .expect("Unable to create Bad Request response for invalid percent decode"))
+                };
 
                 let param_id = match percent_encoding::percent_decode(path_params["id"].as_bytes()).decode_utf8() {
                     Ok(param_id) => match param_id.parse::<String>() {
@@ -703,6 +717,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 };
 
                                 let result = api_impl.get_organisation(
+                                            param_organisation_id_variant,
                                             param_id,
                                         &context
                                     ).await;
@@ -769,8 +784,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for GET_ORGANISATION_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                                 GetOrganisationResponse::NotFound
                                                     {
@@ -835,16 +850,30 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                         Ok(response)
             },
 
-            // GetProduct - GET /product/{id}
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_ID) => {
+            // GetProduct - GET /product/{productIdVariant}:{id}
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => {
                 // Path parameters
                 let path: &str = uri.path();
                 let path_params =
-                    paths::REGEX_PRODUCT_ID
+                    paths::REGEX_PRODUCT_PRODUCTIDVARIANTID
                     .captures(path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE PRODUCT_ID in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_ID.as_str())
+                        panic!("Path {} matched RE PRODUCT_PRODUCTIDVARIANTID in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_PRODUCTIDVARIANTID.as_str())
                     );
+
+                let param_product_id_variant = match percent_encoding::percent_decode(path_params["productIdVariant"].as_bytes()).decode_utf8() {
+                    Ok(param_product_id_variant) => match param_product_id_variant.parse::<models::ProductIdVariant>() {
+                        Ok(param_product_id_variant) => param_product_id_variant,
+                        Err(e) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't parse path parameter productIdVariant: {}", e)))
+                                        .expect("Unable to create Bad Request response for invalid path parameter")),
+                    },
+                    Err(_) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["productIdVariant"])))
+                                        .expect("Unable to create Bad Request response for invalid percent decode"))
+                };
 
                 let param_id = match percent_encoding::percent_decode(path_params["id"].as_bytes()).decode_utf8() {
                     Ok(param_id) => match param_id.parse::<String>() {
@@ -881,6 +910,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                 };
 
                                 let result = api_impl.get_product(
+                                            param_product_id_variant,
                                             param_id,
                                             param_region,
                                         &context
@@ -948,8 +978,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for GET_PRODUCT_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                                 GetProductResponse::NotFound
                                                     {
@@ -1110,8 +1140,8 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         CONTENT_TYPE,
                                                         HeaderValue::from_str("application/json")
                                                             .expect("Unable to create Content-Type header for SEARCH_BY_TEXT_OK"));
-                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    let body_content = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body_content);
                                                 },
                                             },
                                             Err(_) => {
@@ -1128,9 +1158,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             _ if path.matched(paths::ID_) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY_TOPIC) => method_not_allowed(),
-            _ if path.matched(paths::ID_ORGANISATION_ID) => method_not_allowed(),
-            _ if path.matched(paths::ID_PRODUCT_ID) => method_not_allowed(),
+            _ if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => method_not_allowed(),
             _ if path.matched(paths::ID_PRODUCT_ID_ALTERNATIVES) => method_not_allowed(),
+            _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => method_not_allowed(),
             _ if path.matched(paths::ID_SEARCH_TEXT) => method_not_allowed(),
             _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                     .body(Body::empty())
@@ -1153,10 +1183,10 @@ impl<T> RequestParser<T> for ApiRequestParser {
             hyper::Method::GET if path.matched(paths::ID_LIBRARY) => Some("GetLibrary"),
             // GetLibraryItem - GET /library/{topic}
             hyper::Method::GET if path.matched(paths::ID_LIBRARY_TOPIC) => Some("GetLibraryItem"),
-            // GetOrganisation - GET /organisation/{id}
-            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ID) => Some("GetOrganisation"),
-            // GetProduct - GET /product/{id}
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_ID) => Some("GetProduct"),
+            // GetOrganisation - GET /organisation/{organisationIdVariant}:{id}
+            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => Some("GetOrganisation"),
+            // GetProduct - GET /product/{productIdVariant}:{id}
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => Some("GetProduct"),
             // SearchByText - GET /search/text
             hyper::Method::GET if path.matched(paths::ID_SEARCH_TEXT) => Some("SearchByText"),
             _ => None,

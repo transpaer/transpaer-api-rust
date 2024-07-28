@@ -3,7 +3,7 @@ info:
   description: |
     API for the sustaininty backend
   title: Sustainity
-  version: 0.3.0
+  version: 0.4.0
 servers:
 - url: /
 paths:
@@ -106,11 +106,19 @@ paths:
             Access-Control-Allow-Headers:
               $ref: '#/components/headers/corsHeaders'
       summary: Get library item.
-  /organisation/{id}:
+  /organisation/{organisationIdVariant}:{id}:
     get:
       description: Returns full info about a specified organisation.
       operationId: getOrganisation
       parameters:
+      - description: Variant of an organisation ID.
+        explode: false
+        in: path
+        name: organisationIdVariant
+        required: true
+        schema:
+          $ref: '#/components/schemas/organisationIdVariant'
+        style: simple
       - description: ID of a resource.
         explode: false
         in: path
@@ -143,11 +151,19 @@ paths:
             Access-Control-Allow-Headers:
               $ref: '#/components/headers/corsHeaders'
       summary: Get organisation.
-  /product/{id}:
+  /product/{productIdVariant}:{id}:
     get:
       description: Returns full info about a specified product.
       operationId: getProduct
       parameters:
+      - description: Variant of a product ID.
+        explode: false
+        in: path
+        name: productIdVariant
+        required: true
+        schema:
+          $ref: '#/components/schemas/productIdVariant'
+        style: simple
       - description: ID of a resource.
         explode: false
         in: path
@@ -256,6 +272,24 @@ components:
         type: string
       style: simple
   parameters:
+    organisationIdVariant:
+      description: Variant of an organisation ID.
+      explode: false
+      in: path
+      name: organisationIdVariant
+      required: true
+      schema:
+        $ref: '#/components/schemas/organisationIdVariant'
+      style: simple
+    productIdVariant:
+      description: Variant of a product ID.
+      explode: false
+      in: path
+      name: productIdVariant
+      required: true
+      schema:
+        $ref: '#/components/schemas/productIdVariant'
+      style: simple
     id:
       description: ID of a resource.
       explode: false
@@ -293,147 +327,110 @@ components:
         $ref: '#/components/schemas/shortString'
       style: form
   schemas:
-    id:
-      description: ID of a resource.
-      maxLength: 32
-      type: string
-    accuracy:
-      description: Match accuracy.
-      format: double
-      maximum: 1.0
-      minimum: 0.0
-      type: number
-    dataSource:
-      description: Describes where the related data was retrieved from.
-      enum:
-      - wiki
-      - "off"
-      - eu
-      type: string
-    regionCode:
-      description: Code of a region.
-      maxLength: 2
-      minLength: 2
-      type: string
-    gtin:
-      description: Global Trade Item Number.
-      maxLength: 14
-      type: string
     shortString:
       description: "Short string for labels, titles, summaries..."
       maxLength: 1024
       type: string
-    longString:
-      description: "Long string for descriptions, articles..."
-      maxLength: 1048576
-      type: string
-    shortText:
-      description: Short text with its source.
+    textSearchResults:
+      description: List of results of a text search.
       example:
-        text: text
-        source: null
+        results:
+        - link:
+            product_id_variant: ean
+            id: id
+            organisation_id_variant: wiki
+          label: label
+        - link:
+            product_id_variant: ean
+            id: id
+            organisation_id_variant: wiki
+          label: label
       properties:
-        text:
+        results:
+          items:
+            $ref: '#/components/schemas/textSearchResult'
+          type: array
+      required:
+      - results
+      type: object
+    textSearchResult:
+      description: An entry in text search results.
+      example:
+        link:
+          product_id_variant: ean
+          id: id
+          organisation_id_variant: wiki
+        label: label
+      properties:
+        link:
+          $ref: '#/components/schemas/textSearchLinkHack'
+        label:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
-        source:
-          $ref: '#/components/schemas/dataSource'
       required:
-      - source
-      - text
+      - label
+      - link
       type: object
-    longText:
-      description: Long text with its source.
+    textSearchLinkHack:
+      description: Link to a text search result.
       example:
-        text: text
-        source: null
-      properties:
-        text:
-          description: "Long string for descriptions, articles..."
-          maxLength: 1048576
-          type: string
-        source:
-          $ref: '#/components/schemas/dataSource'
-      required:
-      - source
-      - text
-      type: object
-    image:
-      description: Image path/URL with its source.
-      example:
-        image: image
-        source: null
-      properties:
-        image:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
-          type: string
-        source:
-          $ref: '#/components/schemas/dataSource'
-      required:
-      - image
-      - source
-      type: object
-    presentationEntry:
-      description: An entry in a presentation.
-      example:
-        score: 0
-        name: name
+        product_id_variant: ean
         id: id
+        organisation_id_variant: wiki
       properties:
+        organisation_id_variant:
+          $ref: '#/components/schemas/organisationIdVariant'
+        product_id_variant:
+          $ref: '#/components/schemas/productIdVariant'
         id:
           description: ID of a resource.
           maxLength: 32
           type: string
-        name:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
-          type: string
-        score:
-          type: integer
       required:
       - id
-      - name
-      - score
       type: object
-    presentation:
-      description: Additional data to present together with a library item.
+    organisationIdVariant:
+      description: Enumerates organisation ID variants.
+      enum:
+      - wiki
+      - vat
+      - www
+      type: string
+    productIdVariant:
+      description: Enumerates product ID variants.
+      enum:
+      - ean
+      - gtin
+      - wiki
+      type: string
+    id:
+      description: ID of a resource.
+      maxLength: 32
+      type: string
+    libraryContents:
+      description: List of all items in the library.
       example:
-        data:
-        - score: 0
-          name: name
-          id: id
-        - score: 0
-          name: name
-          id: id
+        items:
+        - summary: summary
+          id: info:main
+          title: title
+        - summary: summary
+          id: info:main
+          title: title
       properties:
-        data:
+        items:
           items:
-            $ref: '#/components/schemas/presentationEntry'
+            $ref: '#/components/schemas/libraryItemShort'
           type: array
       required:
-      - data
+      - items
       type: object
-    libraryTopic:
-      description: Name of a topic in the library.
-      enum:
-      - info:main
-      - info:for_producers
-      - info:faq
-      - data:wiki
-      - data:open_food_facts
-      - cert:bcorp
-      - cert:eu_ecolabel
-      - cert:tco
-      - cert:fti
-      - other:not_found
-      type: string
     libraryItemShort:
       description: Short summary of a library item.
       example:
         summary: summary
-        id: null
+        id: info:main
         title: title
       properties:
         id:
@@ -451,6 +448,20 @@ components:
       - summary
       - title
       type: object
+    libraryTopic:
+      description: Name of a topic in the library.
+      enum:
+      - info:main
+      - info:for_producers
+      - info:faq
+      - data:wiki
+      - data:open_food_facts
+      - cert:bcorp
+      - cert:eu_ecolabel
+      - cert:tco
+      - cert:fti
+      - other:not_found
+      type: string
     libraryItemFull:
       description: Full contents of a library item.
       example:
@@ -459,11 +470,11 @@ components:
           data:
           - score: 0
             name: name
-            id: id
+            wiki_id: wiki_id
           - score: 0
             name: name
-            id: id
-        id: null
+            wiki_id: wiki_id
+        id: info:main
         title: title
         article: article
       properties:
@@ -489,244 +500,36 @@ components:
       - summary
       - title
       type: object
-    libraryContents:
-      description: List of all items in the library.
+    longString:
+      description: "Long string for descriptions, articles..."
+      maxLength: 1048576
+      type: string
+    presentation:
+      description: Additional data to present together with a library item.
       example:
-        items:
-        - summary: summary
-          id: null
-          title: title
-        - summary: summary
-          id: null
-          title: title
+        data:
+        - score: 0
+          name: name
+          wiki_id: wiki_id
+        - score: 0
+          name: name
+          wiki_id: wiki_id
       properties:
-        items:
+        data:
           items:
-            $ref: '#/components/schemas/libraryItemShort'
+            $ref: '#/components/schemas/presentationEntry'
           type: array
       required:
-      - items
+      - data
       type: object
-    sustainityScoreCategory:
-      description: Categories in the sustainity score
-      enum:
-      - dataAvailability
-      - producerKnown
-      - productionPlaceKnown
-      - idKnown
-      - categoryAssigned
-      - category
-      - warrantyLength
-      - numCerts
-      - atLeastOneCert
-      - atLeastTwoCerts
-      type: string
-    sustainityScoreBranch:
-      description: Part of explanation of calculation of the Sustainity score.
+    presentationEntry:
+      description: An entry in a presentation.
       example:
-        score: 2.3021358869347655
-        weight: 5
-        category: null
-        branches:
-        - null
-        - null
-      properties:
-        category:
-          $ref: '#/components/schemas/sustainityScoreCategory'
-        weight:
-          type: integer
-        score:
-          format: double
-          type: number
-        branches:
-          items:
-            $ref: '#/components/schemas/sustainityScoreBranch'
-          type: array
-      required:
-      - branches
-      - category
-      - score
-      - weight
-      type: object
-    sustainityScore:
-      description: Explanation of calculation of the Sustainity score.
-      example:
-        total: 5.962133916683182
-        tree:
-        - score: 2.3021358869347655
-          weight: 5
-          category: null
-          branches:
-          - null
-          - null
-        - score: 2.3021358869347655
-          weight: 5
-          category: null
-          branches:
-          - null
-          - null
-      properties:
-        total:
-          format: double
-          type: number
-        tree:
-          items:
-            $ref: '#/components/schemas/sustainityScoreBranch'
-          type: array
-      required:
-      - total
-      - tree
-      type: object
-    badgeName:
-      description: Name of a badge.
-      enum:
-      - bcorp
-      - eu
-      - tco
-      type: string
-    scorerName:
-      description: Name of a scorer.
-      enum:
-      - fti
-      type: string
-    bCorpMedallion:
-      description: Details of BCorp evaluation.
-      example:
-        id: id
-      properties:
-        id:
-          description: ID of a resource.
-          maxLength: 32
-          type: string
-      required:
-      - id
-      type: object
-    euEcolabelMedallion:
-      description: Details of EU Ecolabel evaluation.
-      example:
-        matchAccuracy: 0.6027456183070403
-      properties:
-        matchAccuracy:
-          description: Match accuracy.
-          format: double
-          maximum: 1.0
-          minimum: 0.0
-          type: number
-      required:
-      - matchAccuracy
-      type: object
-    ftiMedallion:
-      description: Details of Fashion Transparency Index evaluation.
-      example:
-        score: 1
-      properties:
-        score:
-          type: integer
-      required:
-      - score
-      type: object
-    sustainityMedallion:
-      description: Details of Sustainity evaluation.
-      example:
-        score:
-          total: 5.962133916683182
-          tree:
-          - score: 2.3021358869347655
-            weight: 5
-            category: null
-            branches:
-            - null
-            - null
-          - score: 2.3021358869347655
-            weight: 5
-            category: null
-            branches:
-            - null
-            - null
-      properties:
-        score:
-          $ref: '#/components/schemas/sustainityScore'
-      required:
-      - score
-      type: object
-    tcoMedallion:
-      description: Details of TCO evaluation.
-      example:
-        brandName: brandName
-      properties:
-        brandName:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
-          type: string
-      required:
-      - brandName
-      type: object
-    medallionVariant:
-      description: Medallion variant.
-      enum:
-      - bCorp
-      - euEcolabel
-      - fti
-      - sustainity
-      - tco
-      type: string
-    medallion:
-      description: Combines data from any medallion.
-      example:
-        euEcolabel:
-          matchAccuracy: 0.6027456183070403
-        tco:
-          brandName: brandName
-        sustainity:
-          score:
-            total: 5.962133916683182
-            tree:
-            - score: 2.3021358869347655
-              weight: 5
-              category: null
-              branches:
-              - null
-              - null
-            - score: 2.3021358869347655
-              weight: 5
-              category: null
-              branches:
-              - null
-              - null
-        variant: null
-        fti:
-          score: 1
-        bcorp:
-          id: id
-      properties:
-        variant:
-          $ref: '#/components/schemas/medallionVariant'
-        bcorp:
-          $ref: '#/components/schemas/bCorpMedallion'
-        euEcolabel:
-          $ref: '#/components/schemas/euEcolabelMedallion'
-        fti:
-          $ref: '#/components/schemas/ftiMedallion'
-        sustainity:
-          $ref: '#/components/schemas/sustainityMedallion'
-        tco:
-          $ref: '#/components/schemas/tcoMedallion'
-      required:
-      - variant
-      type: object
-    organisationShort:
-      description: Extract from organisation data.
-      example:
-        badges:
-        - null
-        - null
-        organisationId: organisationId
-        scores:
-          key: 0
+        score: 0
         name: name
-        description: description
+        wiki_id: wiki_id
       properties:
-        organisationId:
+        wiki_id:
           description: ID of a resource.
           maxLength: 32
           type: string
@@ -734,23 +537,12 @@ components:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
-        description:
-          description: "Long string for descriptions, articles..."
-          maxLength: 1048576
-          type: string
-        badges:
-          items:
-            $ref: '#/components/schemas/badgeName'
-          type: array
-        scores:
-          additionalProperties:
-            type: integer
-          type: object
+        score:
+          type: integer
       required:
-      - badges
       - name
-      - organisationId
-      - scores
+      - score
+      - wiki_id
       type: object
     organisationFull:
       description: Full organisation data.
@@ -760,12 +552,11 @@ components:
           source: null
         - image: image
           source: null
-        organisationId: organisationId
         names:
         - text: text
-          source: null
+          source: wiki
         - text: text
-          source: null
+          source: wiki
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
@@ -777,17 +568,17 @@ components:
               tree:
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
-          variant: null
+          variant: bCorp
           fti:
             score: 1
           bcorp:
@@ -802,17 +593,17 @@ components:
               tree:
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
-          variant: null
+          variant: bCorp
           fti:
             score: 1
           bcorp:
@@ -825,28 +616,60 @@ components:
           source: null
         - text: text
           source: null
+        organisationIds:
+          wiki:
+          - null
+          - null
+          vat:
+          - null
+          - null
+          domains:
+          - null
+          - null
         products:
         - badges:
-          - null
-          - null
-          productId: productId
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
         - badges:
-          - null
-          - null
-          productId: productId
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
       properties:
-        organisationId:
-          description: ID of a resource.
-          maxLength: 32
-          type: string
+        organisationIds:
+          $ref: '#/components/schemas/organisationIds'
         names:
           items:
             $ref: '#/components/schemas/shortText'
@@ -872,30 +695,123 @@ components:
             $ref: '#/components/schemas/medallion'
           type: array
       required:
-      - description
+      - descriptions
       - images
       - medallions
-      - name
-      - organisationId
+      - names
+      - organisationIds
       - products
       - websites
+      type: object
+    organisationIds:
+      description: IDs of an organisation.
+      example:
+        wiki:
+        - null
+        - null
+        vat:
+        - null
+        - null
+        domains:
+        - null
+        - null
+      properties:
+        wiki:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+        vat:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+        domains:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+      type: object
+    shortText:
+      description: Short text with its source.
+      example:
+        text: text
+        source: wiki
+      properties:
+        text:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - source
+      - text
+      type: object
+    dataSource:
+      description: Describes where the related data was retrieved from.
+      enum:
+      - wiki
+      - "off"
+      - eu
+      - b_corp
+      - fti
+      - tco
+      - other
+      type: string
+    longText:
+      description: Long text with its source.
+      example:
+        text: text
+        source: null
+      properties:
+        text:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - source
+      - text
+      type: object
+    image:
+      description: Image path/URL with its source.
+      example:
+        image: image
+        source: null
+      properties:
+        image:
+          type: string
+        source:
+          $ref: '#/components/schemas/dataSource'
+      required:
+      - image
+      - source
       type: object
     productShort:
       description: Extract from product data.
       example:
         badges:
-        - null
-        - null
-        productId: productId
+        - bcorp
+        - bcorp
+        productIds:
+          gtins:
+          - null
+          - null
+          wiki:
+          - null
+          - null
+          eans:
+          - null
+          - null
         scores:
-          key: 0
+        - score: 0
+          scorerName: fti
+        - score: 0
+          scorerName: fti
         name: name
         description: description
       properties:
-        productId:
-          description: ID of a resource.
-          maxLength: 32
-          type: string
+        productIds:
+          $ref: '#/components/schemas/productIds'
         name:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
@@ -909,21 +825,276 @@ components:
             $ref: '#/components/schemas/badgeName'
           type: array
         scores:
-          additionalProperties:
-            type: integer
-          type: object
+          items:
+            $ref: '#/components/schemas/score'
+          type: array
       required:
       - badges
       - name
-      - productId
+      - productIds
       - scores
       type: object
-    productFull:
-      description: Full product data.
+    productIds:
+      description: IDs of a product.
       example:
         gtins:
         - null
         - null
+        wiki:
+        - null
+        - null
+        eans:
+        - null
+        - null
+      properties:
+        eans:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+        gtins:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+        wiki:
+          items:
+            $ref: '#/components/schemas/id'
+          type: array
+      type: object
+    badgeName:
+      description: Name of a badge.
+      enum:
+      - bcorp
+      - eu
+      - tco
+      type: string
+    score:
+      description: score.
+      example:
+        score: 0
+        scorerName: fti
+      properties:
+        scorerName:
+          $ref: '#/components/schemas/scorerName'
+        score:
+          format: int64
+          type: integer
+      required:
+      - score
+      - scorerName
+      type: object
+    scorerName:
+      description: Name of a scorer.
+      enum:
+      - fti
+      type: string
+    medallion:
+      description: Combines data from any medallion.
+      example:
+        euEcolabel:
+          matchAccuracy: 0.6027456183070403
+        tco:
+          brandName: brandName
+        sustainity:
+          score:
+            total: 5.962133916683182
+            tree:
+            - score: 2.3021358869347655
+              weight: 5
+              category: dataAvailability
+              branches:
+              - null
+              - null
+            - score: 2.3021358869347655
+              weight: 5
+              category: dataAvailability
+              branches:
+              - null
+              - null
+        variant: bCorp
+        fti:
+          score: 1
+        bcorp:
+          id: id
+      properties:
+        variant:
+          $ref: '#/components/schemas/medallionVariant'
+        bcorp:
+          $ref: '#/components/schemas/bCorpMedallion'
+        euEcolabel:
+          $ref: '#/components/schemas/euEcolabelMedallion'
+        fti:
+          $ref: '#/components/schemas/ftiMedallion'
+        sustainity:
+          $ref: '#/components/schemas/sustainityMedallion'
+        tco:
+          $ref: '#/components/schemas/tcoMedallion'
+      required:
+      - variant
+      type: object
+    medallionVariant:
+      description: Medallion variant.
+      enum:
+      - bCorp
+      - euEcolabel
+      - fti
+      - sustainity
+      - tco
+      type: string
+    bCorpMedallion:
+      description: Details of BCorp evaluation.
+      example:
+        id: id
+      properties:
+        id:
+          description: ID of a resource.
+          maxLength: 32
+          type: string
+      required:
+      - id
+      type: object
+    euEcolabelMedallion:
+      description: Details of EU Ecolabel evaluation.
+      example:
+        matchAccuracy: 0.6027456183070403
+      properties:
+        matchAccuracy:
+          description: Match accuracy.
+          format: double
+          maximum: 1.0
+          minimum: 0.0
+          type: number
+      type: object
+    accuracy:
+      description: Match accuracy.
+      format: double
+      maximum: 1.0
+      minimum: 0.0
+      type: number
+    ftiMedallion:
+      description: Details of Fashion Transparency Index evaluation.
+      example:
+        score: 1
+      properties:
+        score:
+          format: int64
+          type: integer
+      required:
+      - score
+      type: object
+    sustainityMedallion:
+      description: Details of Sustainity evaluation.
+      example:
+        score:
+          total: 5.962133916683182
+          tree:
+          - score: 2.3021358869347655
+            weight: 5
+            category: dataAvailability
+            branches:
+            - null
+            - null
+          - score: 2.3021358869347655
+            weight: 5
+            category: dataAvailability
+            branches:
+            - null
+            - null
+      properties:
+        score:
+          $ref: '#/components/schemas/sustainityScore'
+      required:
+      - score
+      type: object
+    sustainityScore:
+      description: Explanation of calculation of the Sustainity score.
+      example:
+        total: 5.962133916683182
+        tree:
+        - score: 2.3021358869347655
+          weight: 5
+          category: dataAvailability
+          branches:
+          - null
+          - null
+        - score: 2.3021358869347655
+          weight: 5
+          category: dataAvailability
+          branches:
+          - null
+          - null
+      properties:
+        total:
+          format: double
+          type: number
+        tree:
+          items:
+            $ref: '#/components/schemas/sustainityScoreBranch'
+          type: array
+      required:
+      - total
+      - tree
+      type: object
+    sustainityScoreBranch:
+      description: Part of explanation of calculation of the Sustainity score.
+      example:
+        score: 2.3021358869347655
+        weight: 5
+        category: dataAvailability
+        branches:
+        - null
+        - null
+      properties:
+        category:
+          $ref: '#/components/schemas/sustainityScoreCategory'
+        weight:
+          type: integer
+        score:
+          format: double
+          type: number
+        branches:
+          items:
+            $ref: '#/components/schemas/sustainityScoreBranch'
+          type: array
+      required:
+      - branches
+      - category
+      - score
+      - weight
+      type: object
+    sustainityScoreCategory:
+      description: Categories in the sustainity score
+      enum:
+      - dataAvailability
+      - producerKnown
+      - productionPlaceKnown
+      - idKnown
+      - categoryAssigned
+      - category
+      - warrantyLength
+      - numCerts
+      - atLeastOneCert
+      - atLeastTwoCerts
+      type: string
+    tcoMedallion:
+      description: Details of TCO evaluation.
+      example:
+        brandName: brandName
+      properties:
+        brandName:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+      required:
+      - brandName
+      type: object
+    regionCode:
+      description: Code of a region.
+      maxLength: 2
+      minLength: 2
+      type: string
+    productFull:
+      description: Full product data.
+      example:
         images:
         - image: image
           source: null
@@ -931,27 +1102,60 @@ components:
           source: null
         names:
         - text: text
-          source: null
+          source: wiki
         - text: text
-          source: null
-        productId: productId
+          source: wiki
         manufacturers:
         - badges:
-          - null
-          - null
-          organisationId: organisationId
+          - bcorp
+          - bcorp
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
+          organisationIds:
+            wiki:
+            - null
+            - null
+            vat:
+            - null
+            - null
+            domains:
+            - null
+            - null
         - badges:
-          - null
-          - null
-          organisationId: organisationId
+          - bcorp
+          - bcorp
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
+          organisationIds:
+            wiki:
+            - null
+            - null
+            vat:
+            - null
+            - null
+            domains:
+            - null
+            - null
+        productIds:
+          gtins:
+          - null
+          - null
+          wiki:
+          - null
+          - null
+          eans:
+          - null
+          - null
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
@@ -963,17 +1167,17 @@ components:
               tree:
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
-          variant: null
+          variant: bCorp
           fti:
             score: 1
           bcorp:
@@ -988,17 +1192,17 @@ components:
               tree:
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
               - score: 2.3021358869347655
                 weight: 5
-                category: null
+                category: dataAvailability
                 branches:
                 - null
                 - null
-          variant: null
+          variant: bCorp
           fti:
             score: 1
           bcorp:
@@ -1006,37 +1210,85 @@ components:
         alternatives:
         - alternatives:
           - badges:
-            - null
-            - null
-            productId: productId
+            - bcorp
+            - bcorp
+            productIds:
+              gtins:
+              - null
+              - null
+              wiki:
+              - null
+              - null
+              eans:
+              - null
+              - null
             scores:
-              key: 0
+            - score: 0
+              scorerName: fti
+            - score: 0
+              scorerName: fti
             name: name
             description: description
           - badges:
-            - null
-            - null
-            productId: productId
+            - bcorp
+            - bcorp
+            productIds:
+              gtins:
+              - null
+              - null
+              wiki:
+              - null
+              - null
+              eans:
+              - null
+              - null
             scores:
-              key: 0
+            - score: 0
+              scorerName: fti
+            - score: 0
+              scorerName: fti
             name: name
             description: description
           category: category
         - alternatives:
           - badges:
-            - null
-            - null
-            productId: productId
+            - bcorp
+            - bcorp
+            productIds:
+              gtins:
+              - null
+              - null
+              wiki:
+              - null
+              - null
+              eans:
+              - null
+              - null
             scores:
-              key: 0
+            - score: 0
+              scorerName: fti
+            - score: 0
+              scorerName: fti
             name: name
             description: description
           - badges:
-            - null
-            - null
-            productId: productId
+            - bcorp
+            - bcorp
+            productIds:
+              gtins:
+              - null
+              - null
+              wiki:
+              - null
+              - null
+              eans:
+              - null
+              - null
             scores:
-              key: 0
+            - score: 0
+              scorerName: fti
+            - score: 0
+              scorerName: fti
             name: name
             description: description
           category: category
@@ -1046,14 +1298,8 @@ components:
         - text: text
           source: null
       properties:
-        productId:
-          description: ID of a resource.
-          maxLength: 32
-          type: string
-        gtins:
-          items:
-            $ref: '#/components/schemas/gtin'
-          type: array
+        productIds:
+          $ref: '#/components/schemas/productIds'
         names:
           items:
             $ref: '#/components/schemas/shortText'
@@ -1080,37 +1326,108 @@ components:
           type: array
       required:
       - alternatives
+      - descriptions
       - images
       - manufacturers
       - medallions
+      - names
+      - productIds
+      type: object
+    organisationShort:
+      description: Extract from organisation data.
+      example:
+        badges:
+        - bcorp
+        - bcorp
+        scores:
+        - score: 0
+          scorerName: fti
+        - score: 0
+          scorerName: fti
+        name: name
+        description: description
+        organisationIds:
+          wiki:
+          - null
+          - null
+          vat:
+          - null
+          - null
+          domains:
+          - null
+          - null
+      properties:
+        organisationIds:
+          $ref: '#/components/schemas/organisationIds'
+        name:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+        description:
+          description: "Long string for descriptions, articles..."
+          maxLength: 1048576
+          type: string
+        badges:
+          items:
+            $ref: '#/components/schemas/badgeName'
+          type: array
+        scores:
+          items:
+            $ref: '#/components/schemas/score'
+          type: array
+      required:
+      - badges
       - name
-      - productId
+      - organisationIds
+      - scores
       type: object
     categoryAlternatives:
       description: List of product alternative in the given category.
       example:
         alternatives:
         - badges:
-          - null
-          - null
-          productId: productId
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
         - badges:
-          - null
-          - null
-          productId: productId
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
           scores:
-            key: 0
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
           name: name
           description: description
         category: category
       properties:
         category:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
           type: string
         alternatives:
           items:
@@ -1119,51 +1436,5 @@ components:
       required:
       - alternatives
       - category
-      type: object
-    textSearchResultVariant:
-      description: Variant for text search result entry.
-      enum:
-      - product
-      - organisation
-      type: string
-    textSearchResult:
-      description: An entry in text search results.
-      example:
-        variant: null
-        id: id
-        label: label
-      properties:
-        variant:
-          $ref: '#/components/schemas/textSearchResultVariant'
-        id:
-          description: ID of a resource.
-          maxLength: 32
-          type: string
-        label:
-          description: "Short string for labels, titles, summaries..."
-          maxLength: 1024
-          type: string
-      required:
-      - id
-      - label
-      - variant
-      type: object
-    textSearchResults:
-      description: List of results of a text search.
-      example:
-        results:
-        - variant: null
-          id: id
-          label: label
-        - variant: null
-          id: id
-          label: label
-      properties:
-        results:
-          items:
-            $ref: '#/components/schemas/textSearchResult'
-          type: array
-      required:
-      - results
       type: object
 

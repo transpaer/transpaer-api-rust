@@ -151,21 +151,23 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
     /// Get organisation.
     async fn get_organisation(
         &self,
+        organisation_id_variant: models::OrganisationIdVariant,
         id: String,
         context: &C) -> Result<GetOrganisationResponse, ApiError>
     {
-        info!("get_organisation(\"{}\") - X-Span-ID: {:?}", id, context.get().0.clone());
+        info!("get_organisation({:?}, \"{}\") - X-Span-ID: {:?}", organisation_id_variant, id, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
 
     /// Get product.
     async fn get_product(
         &self,
+        product_id_variant: models::ProductIdVariant,
         id: String,
         region: Option<String>,
         context: &C) -> Result<GetProductResponse, ApiError>
     {
-        info!("get_product(\"{}\", {:?}) - X-Span-ID: {:?}", id, region, context.get().0.clone());
+        info!("get_product({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", product_id_variant, id, region, context.get().0.clone());
         Err(ApiError("Generic failure".into()))
     }
 

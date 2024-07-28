@@ -14,8 +14,9 @@ To see how to make this your own, look here:
 
 [README]((https://openapi-generator.tech))
 
-- API version: 0.3.0
-- Build date: 2023-12-09T22:32:30.279885+01:00[Europe/Amsterdam]
+- API version: 0.4.0
+- Build date: 2024-07-22T20:41:41.081519+02:00[Europe/Amsterdam]
+- Generator version: 7.6.0
 
 
 
@@ -65,8 +66,6 @@ To run a client, follow one of the following simple steps:
 cargo run --example client CheckHealth
 cargo run --example client GetAlternatives
 cargo run --example client GetLibrary
-cargo run --example client GetOrganisation
-cargo run --example client GetProduct
 cargo run --example client SearchByText
 ```
 
@@ -105,8 +104,8 @@ Method | HTTP request | Description
 [**getAlternatives**](docs/default_api.md#getAlternatives) | **GET** /product/{id}/alternatives | Get product alternatives.
 [**getLibrary**](docs/default_api.md#getLibrary) | **GET** /library | Get library contents.
 [**getLibraryItem**](docs/default_api.md#getLibraryItem) | **GET** /library/{topic} | Get library item.
-[**getOrganisation**](docs/default_api.md#getOrganisation) | **GET** /organisation/{id} | Get organisation.
-[**getProduct**](docs/default_api.md#getProduct) | **GET** /product/{id} | Get product.
+[**getOrganisation**](docs/default_api.md#getOrganisation) | **GET** /organisation/{organisationIdVariant}:{id} | Get organisation.
+[**getProduct**](docs/default_api.md#getProduct) | **GET** /product/{productIdVariant}:{id} | Get product.
 [**searchByText**](docs/default_api.md#searchByText) | **GET** /search/text | Text search.
 
 
@@ -119,7 +118,6 @@ Method | HTTP request | Description
  - [DataSource](docs/DataSource.md)
  - [EuEcolabelMedallion](docs/EuEcolabelMedallion.md)
  - [FtiMedallion](docs/FtiMedallion.md)
- - [Gtin](docs/Gtin.md)
  - [Id](docs/Id.md)
  - [Image](docs/Image.md)
  - [LibraryContents](docs/LibraryContents.md)
@@ -131,12 +129,17 @@ Method | HTTP request | Description
  - [Medallion](docs/Medallion.md)
  - [MedallionVariant](docs/MedallionVariant.md)
  - [OrganisationFull](docs/OrganisationFull.md)
+ - [OrganisationIdVariant](docs/OrganisationIdVariant.md)
+ - [OrganisationIds](docs/OrganisationIds.md)
  - [OrganisationShort](docs/OrganisationShort.md)
  - [Presentation](docs/Presentation.md)
  - [PresentationEntry](docs/PresentationEntry.md)
  - [ProductFull](docs/ProductFull.md)
+ - [ProductIdVariant](docs/ProductIdVariant.md)
+ - [ProductIds](docs/ProductIds.md)
  - [ProductShort](docs/ProductShort.md)
  - [RegionCode](docs/RegionCode.md)
+ - [Score](docs/Score.md)
  - [ScorerName](docs/ScorerName.md)
  - [ShortString](docs/ShortString.md)
  - [ShortText](docs/ShortText.md)
@@ -145,8 +148,8 @@ Method | HTTP request | Description
  - [SustainityScoreBranch](docs/SustainityScoreBranch.md)
  - [SustainityScoreCategory](docs/SustainityScoreCategory.md)
  - [TcoMedallion](docs/TcoMedallion.md)
+ - [TextSearchLinkHack](docs/TextSearchLinkHack.md)
  - [TextSearchResult](docs/TextSearchResult.md)
- - [TextSearchResultVariant](docs/TextSearchResultVariant.md)
  - [TextSearchResults](docs/TextSearchResults.md)
 
 

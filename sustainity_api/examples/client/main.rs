@@ -36,8 +36,6 @@ fn main() {
                 "CheckHealth",
                 "GetAlternatives",
                 "GetLibrary",
-                "GetOrganisation",
-                "GetProduct",
                 "SearchByText",
             ])
             .required(true)
@@ -107,19 +105,25 @@ fn main() {
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
         */
+        /* Disabled because there's no example.
         Some("GetOrganisation") => {
             let result = rt.block_on(client.get_organisation(
+                  ???,
                   "id_example".to_string()
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
+        */
+        /* Disabled because there's no example.
         Some("GetProduct") => {
             let result = rt.block_on(client.get_product(
+                  ???,
                   "id_example".to_string(),
                   Some("region_example".to_string())
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
+        */
         Some("SearchByText") => {
             let result = rt.block_on(client.search_by_text(
                   "query_example".to_string()

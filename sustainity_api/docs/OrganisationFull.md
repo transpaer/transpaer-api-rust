@@ -3,9 +3,9 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**organisation_id** | **String** | ID of a resource. | 
-**names** | [**Vec<models::ShortText>**](shortText.md) |  | [optional] [default to None]
-**descriptions** | [**Vec<models::LongText>**](longText.md) |  | [optional] [default to None]
+**organisation_ids** | [***models::OrganisationIds**](organisationIds.md) |  | 
+**names** | [**Vec<models::ShortText>**](shortText.md) |  | 
+**descriptions** | [**Vec<models::LongText>**](longText.md) |  | 
 **images** | [**Vec<models::Image>**](image.md) |  | 
 **websites** | **Vec<models::ShortString>** |  | 
 **products** | [**Vec<models::ProductShort>**](productShort.md) |  | 
