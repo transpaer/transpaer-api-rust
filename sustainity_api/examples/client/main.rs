@@ -4,16 +4,19 @@
 #[allow(unused_imports)]
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
-use sustainity_api::{Api, ApiNoContext, Client, ContextWrapperExt, models,
+use sustainity_api::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, models,
                       CheckHealthResponse,
-                      GetAlternativesResponse,
                       GetLibraryResponse,
+                      SearchByTextResponse,
                       GetLibraryItemResponse,
+                      GetAlternativesResponse,
                       GetOrganisationResponse,
                       GetProductResponse,
-                      SearchByTextResponse,
                      };
 use clap::{App, Arg};
+
+// NOTE: Set environment variable RUST_LOG to the name of the executable (or "cargo run") to activate console logging for all loglevels.
+//     See https://docs.rs/env_logger/latest/env_logger/  for more details
 
 #[allow(unused_imports)]
 use log::info;
@@ -23,6 +26,10 @@ use log::info;
 use swagger::{AuthData, ContextBuilder, EmptyContext, Has, Push, XSpanIdString};
 
 type ClientContext = swagger::make_context_ty!(ContextBuilder, EmptyContext, Option<AuthData>, XSpanIdString);
+
+mod client_auth;
+use client_auth::build_token;
+
 
 // rt may be unused if there are no examples
 #[allow(unused_mut)]
@@ -34,7 +41,6 @@ fn main() {
             .help("Sets the operation to run")
             .possible_values(&[
                 "CheckHealth",
-                "GetAlternatives",
                 "GetLibrary",
                 "SearchByText",
             ])
@@ -55,14 +61,39 @@ fn main() {
             .help("Port to contact"))
         .get_matches();
 
+    // Create Bearer-token with a fixed key (secret) for test purposes.
+    // In a real (production) system this Bearer token should be obtained via an external Identity/Authentication-server
+    // Ensure that you set the correct algorithm and encodingkey that matches what is used on the server side.
+    // See https://github.com/Keats/jsonwebtoken for more information
+    let auth_token = build_token(
+            Claims {
+                sub: "tester@acme.com".to_owned(),
+                company: "ACME".to_owned(),
+                iss: "my_identity_provider".to_owned(),
+                // added a very long expiry time
+                aud: "org.acme.Resource_Server".to_string(),
+                exp: 10000000000,
+                // In this example code all available Scopes are added, so the current Bearer Token gets fully authorization.
+                scopes:
+                  "".to_owned()
+            },
+            b"secret").unwrap();
+
+    let auth_data = if !auth_token.is_empty() {
+        Some(AuthData::Bearer(swagger::auth::Bearer { token: auth_token}))
+    } else {
+        // No Bearer-token available, so return None
+        None
+    };
+
     let is_https = matches.is_present("https");
     let base_url = format!("{}://{}:{}",
-                           if is_https { "https" } else { "http" },
-                           matches.value_of("host").unwrap(),
-                           matches.value_of("port").unwrap());
+        if is_https { "https" } else { "http" },
+        matches.value_of("host").unwrap(),
+        matches.value_of("port").unwrap());
 
     let context: ClientContext =
-        swagger::make_context!(ContextBuilder, EmptyContext, None as Option<AuthData>, XSpanIdString::default());
+        swagger::make_context!(ContextBuilder, EmptyContext, auth_data, XSpanIdString::default());
 
     let mut client : Box<dyn ApiNoContext<ClientContext>> = if matches.is_present("https") {
         // Using Simple HTTPS
@@ -85,15 +116,14 @@ fn main() {
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        Some("GetAlternatives") => {
-            let result = rt.block_on(client.get_alternatives(
-                  "id_example".to_string(),
-                  Some("region_example".to_string())
+        Some("GetLibrary") => {
+            let result = rt.block_on(client.get_library(
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        Some("GetLibrary") => {
-            let result = rt.block_on(client.get_library(
+        Some("SearchByText") => {
+            let result = rt.block_on(client.search_by_text(
+                  "query_example".to_string()
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
@@ -101,6 +131,16 @@ fn main() {
         Some("GetLibraryItem") => {
             let result = rt.block_on(client.get_library_item(
                   ???
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        */
+        /* Disabled because there's no example.
+        Some("GetAlternatives") => {
+            let result = rt.block_on(client.get_alternatives(
+                  ???,
+                  "id_example".to_string(),
+                  Some("region_example".to_string())
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
@@ -124,12 +164,6 @@ fn main() {
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
         */
-        Some("SearchByText") => {
-            let result = rt.block_on(client.search_by_text(
-                  "query_example".to_string()
-            ));
-            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
-        },
         _ => {
             panic!("Invalid operation provided")
         }

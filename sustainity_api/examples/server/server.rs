@@ -56,6 +56,7 @@ pub async fn create(addr: &str, https: bool) {
             let tls_acceptor = ssl.build();
             let tcp_listener = TcpListener::bind(&addr).await.unwrap();
 
+            info!("Starting a server (with https)");
             loop {
                 if let Ok((tcp, _)) = tcp_listener.accept().await {
                     let ssl = Ssl::new(tls_acceptor.context()).unwrap();
@@ -75,6 +76,7 @@ pub async fn create(addr: &str, https: bool) {
             }
         }
     } else {
+        info!("Starting a server (over http, so no TLS)");
         // Using HTTP
         hyper::server::Server::bind(&addr).serve(service).await.unwrap()
     }
@@ -92,15 +94,21 @@ impl<C> Server<C> {
 }
 
 
+use jsonwebtoken::{decode, encode, errors::Error as JwtError, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation};
+use serde::{Deserialize, Serialize};
+use swagger::auth::Authorization;
+use crate::server_auth;
+
+
 use sustainity_api::{
     Api,
     CheckHealthResponse,
-    GetAlternativesResponse,
     GetLibraryResponse,
+    SearchByTextResponse,
     GetLibraryItemResponse,
+    GetAlternativesResponse,
     GetOrganisationResponse,
     GetProductResponse,
-    SearchByTextResponse,
 };
 use sustainity_api::server::MakeService;
 use std::error::Error;
@@ -115,18 +123,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<CheckHealthResponse, ApiError>
     {
         info!("check_health() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
-    }
-
-    /// Get product alternatives.
-    async fn get_alternatives(
-        &self,
-        id: String,
-        region: Option<String>,
-        context: &C) -> Result<GetAlternativesResponse, ApiError>
-    {
-        info!("get_alternatives(\"{}\", {:?}) - X-Span-ID: {:?}", id, region, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
     /// Get library contents.
@@ -135,7 +132,17 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<GetLibraryResponse, ApiError>
     {
         info!("get_library() - X-Span-ID: {:?}", context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    /// Text search.
+    async fn search_by_text(
+        &self,
+        query: String,
+        context: &C) -> Result<SearchByTextResponse, ApiError>
+    {
+        info!("search_by_text(\"{}\") - X-Span-ID: {:?}", query, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
     /// Get library item.
@@ -145,7 +152,19 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<GetLibraryItemResponse, ApiError>
     {
         info!("get_library_item({:?}) - X-Span-ID: {:?}", topic, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    /// Get product alternatives.
+    async fn get_alternatives(
+        &self,
+        product_id_variant: models::ProductIdVariant,
+        id: String,
+        region: Option<String>,
+        context: &C) -> Result<GetAlternativesResponse, ApiError>
+    {
+        info!("get_alternatives({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", product_id_variant, id, region, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
     /// Get organisation.
@@ -156,7 +175,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<GetOrganisationResponse, ApiError>
     {
         info!("get_organisation({:?}, \"{}\") - X-Span-ID: {:?}", organisation_id_variant, id, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
     /// Get product.
@@ -168,17 +187,7 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<GetProductResponse, ApiError>
     {
         info!("get_product({:?}, \"{}\", {:?}) - X-Span-ID: {:?}", product_id_variant, id, region, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
-    }
-
-    /// Text search.
-    async fn search_by_text(
-        &self,
-        query: String,
-        context: &C) -> Result<SearchByTextResponse, ApiError>
-    {
-        info!("search_by_text(\"{}\") - X-Span-ID: {:?}", query, context.get().0.clone());
-        Err(ApiError("Generic failure".into()))
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 
 }

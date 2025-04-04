@@ -37,12 +37,12 @@ const ID_ENCODE_SET: &AsciiSet = &FRAGMENT_ENCODE_SET.add(b'|');
 
 use crate::{Api,
      CheckHealthResponse,
-     GetAlternativesResponse,
      GetLibraryResponse,
+     SearchByTextResponse,
      GetLibraryItemResponse,
+     GetAlternativesResponse,
      GetOrganisationResponse,
-     GetProductResponse,
-     SearchByTextResponse
+     GetProductResponse
      };
 
 /// Convert input into a base path, e.g. "http://example:123". Also checks the scheme as it goes.
@@ -501,189 +501,6 @@ impl<S, C> Api<C> for Client<S, C> where
         }
     }
 
-    async fn get_alternatives(
-        &self,
-        param_id: String,
-        param_region: Option<String>,
-        context: &C) -> Result<GetAlternativesResponse, ApiError>
-    {
-        let mut client_service = self.client_service.clone();
-        let mut uri = format!(
-            "{}/product/{id}/alternatives",
-            self.base_path
-            ,id=utf8_percent_encode(&param_id.to_string(), ID_ENCODE_SET)
-        );
-
-        // Query parameters
-        let query_string = {
-            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
-            if let Some(param_region) = param_region {
-                query_string.append_pair("region",
-                    &param_region);
-            }
-            query_string.finish()
-        };
-        if !query_string.is_empty() {
-            uri += "?";
-            uri += &query_string;
-        }
-
-        let uri = match Uri::from_str(&uri) {
-            Ok(uri) => uri,
-            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
-        };
-
-        let mut request = match Request::builder()
-            .method("GET")
-            .uri(uri)
-            .body(Body::empty()) {
-                Ok(req) => req,
-                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
-        };
-
-        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
-        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
-        });
-
-        let response = client_service.call((request, context.clone()))
-            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
-
-        match response.status().as_u16() {
-            200 => {
-                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
-                    Some(response_access_control_allow_origin) => {
-                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
-                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_origin.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 200 was not found."))),
-                };
-
-                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
-                    Some(response_access_control_allow_methods) => {
-                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
-                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_methods.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 200 was not found."))),
-                };
-
-                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
-                    Some(response_access_control_allow_headers) => {
-                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
-                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_headers.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 200 was not found."))),
-                };
-
-                let body = response.into_body();
-                let body = body
-                        .into_raw()
-                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
-                let body = str::from_utf8(&body)
-                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<Vec<models::CategoryAlternatives>>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
-                Ok(GetAlternativesResponse::Ok
-                    {
-                        body,
-                        access_control_allow_origin: response_access_control_allow_origin,
-                        access_control_allow_methods: response_access_control_allow_methods,
-                        access_control_allow_headers: response_access_control_allow_headers,
-                    }
-                )
-            }
-            404 => {
-                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
-                    Some(response_access_control_allow_origin) => {
-                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
-                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 404 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_origin.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 404 was not found."))),
-                };
-
-                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
-                    Some(response_access_control_allow_methods) => {
-                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
-                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 404 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_methods.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 404 was not found."))),
-                };
-
-                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
-                    Some(response_access_control_allow_headers) => {
-                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
-                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 404 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_headers.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 404 was not found."))),
-                };
-
-                Ok(
-                    GetAlternativesResponse::NotFound
-                    {
-                        access_control_allow_origin: response_access_control_allow_origin,
-                        access_control_allow_methods: response_access_control_allow_methods,
-                        access_control_allow_headers: response_access_control_allow_headers,
-                    }
-                )
-            }
-            code => {
-                let headers = response.headers().clone();
-                let body = response.into_body()
-                       .take(100)
-                       .into_raw().await;
-                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
-                    code,
-                    headers,
-                    match body {
-                        Ok(body) => match String::from_utf8(body) {
-                            Ok(body) => body,
-                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
-                        },
-                        Err(e) => format!("<Failed to read body: {}>", e),
-                    }
-                )))
-            }
-        }
-    }
-
     async fn get_library(
         &self,
         context: &C) -> Result<GetLibraryResponse, ApiError>
@@ -774,12 +591,143 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = body
                         .into_raw()
                         .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
                 let body = str::from_utf8(&body)
                     .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::LibraryContents>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
+                let body = serde_json::from_str::<models::LibraryContents>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
                 Ok(GetLibraryResponse::Ok
+                    {
+                        body,
+                        access_control_allow_origin: response_access_control_allow_origin,
+                        access_control_allow_methods: response_access_control_allow_methods,
+                        access_control_allow_headers: response_access_control_allow_headers,
+                    }
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn search_by_text(
+        &self,
+        param_query: String,
+        context: &C) -> Result<SearchByTextResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/search/text",
+            self.base_path
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+                query_string.append_pair("query",
+                    &param_query);
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("GET")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
+                    Some(response_access_control_allow_origin) => {
+                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
+                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_origin.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
+                    Some(response_access_control_allow_methods) => {
+                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
+                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_methods.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
+                    Some(response_access_control_allow_headers) => {
+                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
+                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_headers.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 200 was not found."))),
+                };
+
+                let body = response.into_body();
+                let body = body
+                        .into_raw()
+                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
+                let body = str::from_utf8(&body)
+                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
+                let body = serde_json::from_str::<models::TextSearchResults>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
+                Ok(SearchByTextResponse::Ok
                     {
                         body,
                         access_control_allow_origin: response_access_control_allow_origin,
@@ -900,11 +848,13 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = body
                         .into_raw()
                         .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
                 let body = str::from_utf8(&body)
                     .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::LibraryItemFull>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
+                let body = serde_json::from_str::<models::LibraryItemFull>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
                 Ok(GetLibraryItemResponse::Ok
                     {
                         body,
@@ -959,6 +909,193 @@ impl<S, C> Api<C> for Client<S, C> where
 
                 Ok(
                     GetLibraryItemResponse::NotFound
+                    {
+                        access_control_allow_origin: response_access_control_allow_origin,
+                        access_control_allow_methods: response_access_control_allow_methods,
+                        access_control_allow_headers: response_access_control_allow_headers,
+                    }
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn get_alternatives(
+        &self,
+        param_product_id_variant: models::ProductIdVariant,
+        param_id: String,
+        param_region: Option<String>,
+        context: &C) -> Result<GetAlternativesResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/product/{product_id_variant}:{id}/alternatives",
+            self.base_path
+            ,product_id_variant=utf8_percent_encode(&param_product_id_variant.to_string(), ID_ENCODE_SET)
+            ,id=utf8_percent_encode(&param_id.to_string(), ID_ENCODE_SET)
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            if let Some(param_region) = param_region {
+                query_string.append_pair("region",
+                    &param_region);
+            }
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("GET")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
+                    Some(response_access_control_allow_origin) => {
+                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
+                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_origin.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
+                    Some(response_access_control_allow_methods) => {
+                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
+                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_methods.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
+                    Some(response_access_control_allow_headers) => {
+                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
+                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_headers.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 200 was not found."))),
+                };
+
+                let body = response.into_body();
+                let body = body
+                        .into_raw()
+                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
+                let body = str::from_utf8(&body)
+                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
+                let body = serde_json::from_str::<Vec<models::CategoryAlternatives>>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
+                Ok(GetAlternativesResponse::Ok
+                    {
+                        body,
+                        access_control_allow_origin: response_access_control_allow_origin,
+                        access_control_allow_methods: response_access_control_allow_methods,
+                        access_control_allow_headers: response_access_control_allow_headers,
+                    }
+                )
+            }
+            404 => {
+                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
+                    Some(response_access_control_allow_origin) => {
+                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
+                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_origin.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 404 was not found."))),
+                };
+
+                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
+                    Some(response_access_control_allow_methods) => {
+                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
+                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_methods.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 404 was not found."))),
+                };
+
+                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
+                    Some(response_access_control_allow_headers) => {
+                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
+                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_headers.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 404 was not found."))),
+                };
+
+                Ok(
+                    GetAlternativesResponse::NotFound
                     {
                         access_control_allow_origin: response_access_control_allow_origin,
                         access_control_allow_methods: response_access_control_allow_methods,
@@ -1080,11 +1217,13 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = body
                         .into_raw()
                         .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
                 let body = str::from_utf8(&body)
                     .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::OrganisationFull>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
+                let body = serde_json::from_str::<models::OrganisationFull>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
                 Ok(GetOrganisationResponse::Ok
                     {
                         body,
@@ -1265,11 +1404,13 @@ impl<S, C> Api<C> for Client<S, C> where
                 let body = body
                         .into_raw()
                         .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
                 let body = str::from_utf8(&body)
                     .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::ProductFull>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
+                let body = serde_json::from_str::<models::ProductFull>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
                 Ok(GetProductResponse::Ok
                     {
                         body,
@@ -1325,133 +1466,6 @@ impl<S, C> Api<C> for Client<S, C> where
                 Ok(
                     GetProductResponse::NotFound
                     {
-                        access_control_allow_origin: response_access_control_allow_origin,
-                        access_control_allow_methods: response_access_control_allow_methods,
-                        access_control_allow_headers: response_access_control_allow_headers,
-                    }
-                )
-            }
-            code => {
-                let headers = response.headers().clone();
-                let body = response.into_body()
-                       .take(100)
-                       .into_raw().await;
-                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
-                    code,
-                    headers,
-                    match body {
-                        Ok(body) => match String::from_utf8(body) {
-                            Ok(body) => body,
-                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
-                        },
-                        Err(e) => format!("<Failed to read body: {}>", e),
-                    }
-                )))
-            }
-        }
-    }
-
-    async fn search_by_text(
-        &self,
-        param_query: String,
-        context: &C) -> Result<SearchByTextResponse, ApiError>
-    {
-        let mut client_service = self.client_service.clone();
-        let mut uri = format!(
-            "{}/search/text",
-            self.base_path
-        );
-
-        // Query parameters
-        let query_string = {
-            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
-                query_string.append_pair("query",
-                    &param_query);
-            query_string.finish()
-        };
-        if !query_string.is_empty() {
-            uri += "?";
-            uri += &query_string;
-        }
-
-        let uri = match Uri::from_str(&uri) {
-            Ok(uri) => uri,
-            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
-        };
-
-        let mut request = match Request::builder()
-            .method("GET")
-            .uri(uri)
-            .body(Body::empty()) {
-                Ok(req) => req,
-                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
-        };
-
-        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
-        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
-            Ok(h) => h,
-            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
-        });
-
-        let response = client_service.call((request, context.clone()))
-            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
-
-        match response.status().as_u16() {
-            200 => {
-                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
-                    Some(response_access_control_allow_origin) => {
-                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
-                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_origin.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 200 was not found."))),
-                };
-
-                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
-                    Some(response_access_control_allow_methods) => {
-                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
-                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_methods.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 200 was not found."))),
-                };
-
-                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
-                    Some(response_access_control_allow_headers) => {
-                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
-                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
-                            Ok(value) => value,
-                            Err(e) => {
-                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 200 - {}", e)));
-                            },
-                        };
-                        response_access_control_allow_headers.0
-                        },
-                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 200 was not found."))),
-                };
-
-                let body = response.into_body();
-                let body = body
-                        .into_raw()
-                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
-                let body = str::from_utf8(&body)
-                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
-                let body = serde_json::from_str::<models::TextSearchResults>(body).map_err(|e| {
-                    ApiError(format!("Response body did not match the schema: {}", e))
-                })?;
-                Ok(SearchByTextResponse::Ok
-                    {
-                        body,
                         access_control_allow_origin: response_access_control_allow_origin,
                         access_control_allow_methods: response_access_control_allow_methods,
                         access_control_allow_headers: response_access_control_allow_headers,

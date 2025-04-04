@@ -1,54 +1,29 @@
-#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, non_camel_case_types)]
-#![allow(unused_imports, unused_attributes)]
-#![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names, clippy::too_many_arguments)]
+#![allow(missing_docs, trivial_casts, unused_variables, unused_mut, unused_imports, unused_extern_crates, unused_attributes, non_camel_case_types)]
+#![allow(clippy::derive_partial_eq_without_eq, clippy::disallowed_names)]
 
 use async_trait::async_trait;
 use futures::Stream;
 use std::error::Error;
+use std::collections::BTreeSet;
 use std::task::{Poll, Context};
 use swagger::{ApiError, ContextWrapper};
 use serde::{Serialize, Deserialize};
+use crate::server::Authorization;
+
 
 type ServiceError = Box<dyn Error + Send + Sync + 'static>;
 
 pub const BASE_PATH: &str = "";
 pub const API_VERSION: &str = "0.4.0";
 
+mod auth;
+pub use auth::{AuthenticationApi, Claims};
+
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum CheckHealthResponse {
     /// Ok
     Ok
-    {
-        access_control_allow_origin:
-        String
-        ,
-        access_control_allow_methods:
-        String
-        ,
-        access_control_allow_headers:
-        String
-    }
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-#[must_use]
-pub enum GetAlternativesResponse {
-    /// Ok
-    Ok
-    {
-        body: Vec<models::CategoryAlternatives>,
-        access_control_allow_origin:
-        String
-        ,
-        access_control_allow_methods:
-        String
-        ,
-        access_control_allow_headers:
-        String
-    }
-    ,
-    /// Not found
-    NotFound
     {
         access_control_allow_origin:
         String
@@ -79,12 +54,60 @@ pub enum GetLibraryResponse {
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub enum SearchByTextResponse {
+    /// Ok
+    Ok
+    {
+        body: models::TextSearchResults,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
 pub enum GetLibraryItemResponse {
     /// Ok
     Ok
     {
         body: models::LibraryItemFull,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
+pub enum GetAlternativesResponse {
+    /// Ok
+    Ok
+    {
+        body: Vec<models::CategoryAlternatives>,
         access_control_allow_origin:
         String
         ,
@@ -171,23 +194,6 @@ pub enum GetProductResponse {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
-pub enum SearchByTextResponse {
-    /// Ok
-    Ok
-    {
-        body: models::TextSearchResults,
-        access_control_allow_origin:
-        String
-        ,
-        access_control_allow_methods:
-        String
-        ,
-        access_control_allow_headers:
-        String
-    }
-}
-
 /// API
 #[async_trait]
 #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
@@ -201,23 +207,30 @@ pub trait Api<C: Send + Sync> {
         &self,
         context: &C) -> Result<CheckHealthResponse, ApiError>;
 
-    /// Get product alternatives.
-    async fn get_alternatives(
-        &self,
-        id: String,
-        region: Option<String>,
-        context: &C) -> Result<GetAlternativesResponse, ApiError>;
-
     /// Get library contents.
     async fn get_library(
         &self,
         context: &C) -> Result<GetLibraryResponse, ApiError>;
+
+    /// Text search.
+    async fn search_by_text(
+        &self,
+        query: String,
+        context: &C) -> Result<SearchByTextResponse, ApiError>;
 
     /// Get library item.
     async fn get_library_item(
         &self,
         topic: models::LibraryTopic,
         context: &C) -> Result<GetLibraryItemResponse, ApiError>;
+
+    /// Get product alternatives.
+    async fn get_alternatives(
+        &self,
+        product_id_variant: models::ProductIdVariant,
+        id: String,
+        region: Option<String>,
+        context: &C) -> Result<GetAlternativesResponse, ApiError>;
 
     /// Get organisation.
     async fn get_organisation(
@@ -233,12 +246,6 @@ pub trait Api<C: Send + Sync> {
         id: String,
         region: Option<String>,
         context: &C) -> Result<GetProductResponse, ApiError>;
-
-    /// Text search.
-    async fn search_by_text(
-        &self,
-        query: String,
-        context: &C) -> Result<SearchByTextResponse, ApiError>;
 
 }
 
@@ -256,23 +263,30 @@ pub trait ApiNoContext<C: Send + Sync> {
         &self,
         ) -> Result<CheckHealthResponse, ApiError>;
 
-    /// Get product alternatives.
-    async fn get_alternatives(
-        &self,
-        id: String,
-        region: Option<String>,
-        ) -> Result<GetAlternativesResponse, ApiError>;
-
     /// Get library contents.
     async fn get_library(
         &self,
         ) -> Result<GetLibraryResponse, ApiError>;
+
+    /// Text search.
+    async fn search_by_text(
+        &self,
+        query: String,
+        ) -> Result<SearchByTextResponse, ApiError>;
 
     /// Get library item.
     async fn get_library_item(
         &self,
         topic: models::LibraryTopic,
         ) -> Result<GetLibraryItemResponse, ApiError>;
+
+    /// Get product alternatives.
+    async fn get_alternatives(
+        &self,
+        product_id_variant: models::ProductIdVariant,
+        id: String,
+        region: Option<String>,
+        ) -> Result<GetAlternativesResponse, ApiError>;
 
     /// Get organisation.
     async fn get_organisation(
@@ -288,12 +302,6 @@ pub trait ApiNoContext<C: Send + Sync> {
         id: String,
         region: Option<String>,
         ) -> Result<GetProductResponse, ApiError>;
-
-    /// Text search.
-    async fn search_by_text(
-        &self,
-        query: String,
-        ) -> Result<SearchByTextResponse, ApiError>;
 
 }
 
@@ -329,17 +337,6 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
         self.api().check_health(&context).await
     }
 
-    /// Get product alternatives.
-    async fn get_alternatives(
-        &self,
-        id: String,
-        region: Option<String>,
-        ) -> Result<GetAlternativesResponse, ApiError>
-    {
-        let context = self.context().clone();
-        self.api().get_alternatives(id, region, &context).await
-    }
-
     /// Get library contents.
     async fn get_library(
         &self,
@@ -347,6 +344,16 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     {
         let context = self.context().clone();
         self.api().get_library(&context).await
+    }
+
+    /// Text search.
+    async fn search_by_text(
+        &self,
+        query: String,
+        ) -> Result<SearchByTextResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().search_by_text(query, &context).await
     }
 
     /// Get library item.
@@ -357,6 +364,18 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     {
         let context = self.context().clone();
         self.api().get_library_item(topic, &context).await
+    }
+
+    /// Get product alternatives.
+    async fn get_alternatives(
+        &self,
+        product_id_variant: models::ProductIdVariant,
+        id: String,
+        region: Option<String>,
+        ) -> Result<GetAlternativesResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().get_alternatives(product_id_variant, id, region, &context).await
     }
 
     /// Get organisation.
@@ -380,16 +399,6 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     {
         let context = self.context().clone();
         self.api().get_product(product_id_variant, id, region, &context).await
-    }
-
-    /// Text search.
-    async fn search_by_text(
-        &self,
-        query: String,
-        ) -> Result<SearchByTextResponse, ApiError>
-    {
-        let context = self.context().clone();
-        self.api().search_by_text(query, &context).await
     }
 
 }
