@@ -204,11 +204,19 @@ paths:
             Access-Control-Allow-Headers:
               $ref: '#/components/headers/corsHeaders'
       summary: Get product.
-  /product/{id}/alternatives:
+  /product/{productIdVariant}:{id}/alternatives:
     get:
       description: Returns a list of alternative products for each of products category.
       operationId: getAlternatives
       parameters:
+      - description: Variant of a product ID.
+        explode: false
+        in: path
+        name: productIdVariant
+        required: true
+        schema:
+          $ref: '#/components/schemas/productIdVariant'
+        style: simple
       - description: ID of a resource.
         explode: false
         in: path
