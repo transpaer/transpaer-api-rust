@@ -5,7 +5,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **organisation_ids** | [***models::OrganisationIds**](organisationIds.md) |  | 
 **name** | **String** | Short string for labels, titles, summaries... | 
-**description** | **String** | Long string for descriptions, articles... | [optional] [default to None]
+**description** | [***models::LongText**](longText.md) |  | [optional] [default to None]
 **badges** | [**Vec<models::BadgeName>**](badgeName.md) |  | 
 **scores** | [**Vec<models::Score>**](score.md) |  | 
 

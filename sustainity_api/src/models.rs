@@ -106,11 +106,15 @@ impl ToString for Accuracy {
 #[doc = "  \"description\": \"Details of BCorp evaluation.\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
-#[doc = "    \"id\""]
+#[doc = "    \"id\","]
+#[doc = "    \"report_url\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"id\": {"]
 #[doc = "      \"$ref\": \"#/$defs/id\""]
+#[doc = "    },"]
+#[doc = "    \"report_url\": {"]
+#[doc = "      \"$ref\": \"#/$defs/longString\""]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -119,6 +123,7 @@ impl ToString for Accuracy {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BCorpMedallion {
     pub id: Id,
+    pub report_url: LongString,
 }
 impl From<&BCorpMedallion> for BCorpMedallion {
     fn from(value: &BCorpMedallion) -> Self {
@@ -1030,6 +1035,12 @@ impl std::convert::TryFrom<String> for MedallionVariant {
 #[doc = "    \"organisationIds\": {"]
 #[doc = "      \"$ref\": \"#/$defs/organisationIds\""]
 #[doc = "    },"]
+#[doc = "    \"origins\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/regionCode\""]
+#[doc = "      }"]
+#[doc = "    },"]
 #[doc = "    \"products\": {"]
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
@@ -1054,6 +1065,8 @@ pub struct OrganisationFull {
     pub names: Vec<ShortText>,
     #[serde(rename = "organisationIds")]
     pub organisation_ids: OrganisationIds,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub origins: Vec<RegionCode>,
     pub products: Vec<ProductShort>,
     pub websites: Vec<ShortString>,
 }
@@ -1244,7 +1257,7 @@ impl OrganisationLink {
 #[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"description\": {"]
-#[doc = "      \"$ref\": \"#/$defs/longString\""]
+#[doc = "      \"$ref\": \"#/$defs/longText\""]
 #[doc = "    },"]
 #[doc = "    \"name\": {"]
 #[doc = "      \"$ref\": \"#/$defs/shortString\""]
@@ -1266,7 +1279,7 @@ impl OrganisationLink {
 pub struct OrganisationShort {
     pub badges: Vec<BadgeName>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<LongString>,
+    pub description: Option<LongText>,
     pub name: ShortString,
     #[serde(rename = "organisationIds")]
     pub organisation_ids: OrganisationIds,
@@ -1415,6 +1428,12 @@ impl PresentationEntry {
 #[doc = "        \"$ref\": \"#/$defs/shortText\""]
 #[doc = "      }"]
 #[doc = "    },"]
+#[doc = "    \"origins\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/regionCode\""]
+#[doc = "      }"]
+#[doc = "    },"]
 #[doc = "    \"productIds\": {"]
 #[doc = "      \"$ref\": \"#/$defs/productIds\""]
 #[doc = "    }"]
@@ -1430,6 +1449,8 @@ pub struct ProductFull {
     pub manufacturers: Vec<OrganisationShort>,
     pub medallions: Vec<Medallion>,
     pub names: Vec<ShortText>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub origins: Vec<RegionCode>,
     #[serde(rename = "productIds")]
     pub product_ids: ProductIds,
 }
@@ -1620,7 +1641,7 @@ impl ProductLink {
 #[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"description\": {"]
-#[doc = "      \"$ref\": \"#/$defs/longString\""]
+#[doc = "      \"$ref\": \"#/$defs/longText\""]
 #[doc = "    },"]
 #[doc = "    \"name\": {"]
 #[doc = "      \"$ref\": \"#/$defs/shortString\""]
@@ -1642,7 +1663,7 @@ impl ProductLink {
 pub struct ProductShort {
     pub badges: Vec<BadgeName>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub description: Option<LongString>,
+    pub description: Option<LongText>,
     pub name: ShortString,
     #[serde(rename = "productIds")]
     pub product_ids: ProductIds,
@@ -1666,8 +1687,8 @@ impl ProductShort {
 #[doc = "{"]
 #[doc = "  \"description\": \"Code of a region.\","]
 #[doc = "  \"type\": \"string\","]
-#[doc = "  \"maxLength\": 2,"]
-#[doc = "  \"minLength\": 2"]
+#[doc = "  \"maxLength\": 3,"]
+#[doc = "  \"minLength\": 3"]
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
@@ -1692,11 +1713,11 @@ impl From<&RegionCode> for RegionCode {
 impl std::str::FromStr for RegionCode {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
-        if value.len() > 2usize {
-            return Err("longer than 2 characters".into());
+        if value.len() > 3usize {
+            return Err("longer than 3 characters".into());
         }
-        if value.len() < 2usize {
-            return Err("shorter than 2 characters".into());
+        if value.len() < 3usize {
+            return Err("shorter than 3 characters".into());
         }
         Ok(Self(value.to_string()))
     }
@@ -2362,11 +2383,13 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct BCorpMedallion {
         id: Result<super::Id, String>,
+        report_url: Result<super::LongString, String>,
     }
     impl Default for BCorpMedallion {
         fn default() -> Self {
             Self {
                 id: Err("no value supplied for id".to_string()),
+                report_url: Err("no value supplied for report_url".to_string()),
             }
         }
     }
@@ -2381,16 +2404,32 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for id: {}", e));
             self
         }
+        pub fn report_url<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::LongString>,
+            T::Error: std::fmt::Display,
+        {
+            self.report_url = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for report_url: {}", e));
+            self
+        }
     }
     impl std::convert::TryFrom<BCorpMedallion> for super::BCorpMedallion {
         type Error = super::error::ConversionError;
         fn try_from(value: BCorpMedallion) -> Result<Self, super::error::ConversionError> {
-            Ok(Self { id: value.id? })
+            Ok(Self {
+                id: value.id?,
+                report_url: value.report_url?,
+            })
         }
     }
     impl From<super::BCorpMedallion> for BCorpMedallion {
         fn from(value: super::BCorpMedallion) -> Self {
-            Self { id: Ok(value.id) }
+            Self {
+                id: Ok(value.id),
+                report_url: Ok(value.report_url),
+            }
         }
     }
     #[derive(Clone, Debug)]
@@ -2938,6 +2977,7 @@ pub mod builder {
         medallions: Result<Vec<super::Medallion>, String>,
         names: Result<Vec<super::ShortText>, String>,
         organisation_ids: Result<super::OrganisationIds, String>,
+        origins: Result<Vec<super::RegionCode>, String>,
         products: Result<Vec<super::ProductShort>, String>,
         websites: Result<Vec<super::ShortString>, String>,
     }
@@ -2949,6 +2989,7 @@ pub mod builder {
                 medallions: Err("no value supplied for medallions".to_string()),
                 names: Err("no value supplied for names".to_string()),
                 organisation_ids: Err("no value supplied for organisation_ids".to_string()),
+                origins: Ok(Default::default()),
                 products: Err("no value supplied for products".to_string()),
                 websites: Err("no value supplied for websites".to_string()),
             }
@@ -3008,6 +3049,16 @@ pub mod builder {
             });
             self
         }
+        pub fn origins<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::RegionCode>>,
+            T::Error: std::fmt::Display,
+        {
+            self.origins = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for origins: {}", e));
+            self
+        }
         pub fn products<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<Vec<super::ProductShort>>,
@@ -3038,6 +3089,7 @@ pub mod builder {
                 medallions: value.medallions?,
                 names: value.names?,
                 organisation_ids: value.organisation_ids?,
+                origins: value.origins?,
                 products: value.products?,
                 websites: value.websites?,
             })
@@ -3051,6 +3103,7 @@ pub mod builder {
                 medallions: Ok(value.medallions),
                 names: Ok(value.names),
                 organisation_ids: Ok(value.organisation_ids),
+                origins: Ok(value.origins),
                 products: Ok(value.products),
                 websites: Ok(value.websites),
             }
@@ -3182,7 +3235,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct OrganisationShort {
         badges: Result<Vec<super::BadgeName>, String>,
-        description: Result<Option<super::LongString>, String>,
+        description: Result<Option<super::LongText>, String>,
         name: Result<super::ShortString, String>,
         organisation_ids: Result<super::OrganisationIds, String>,
         scores: Result<Vec<super::Score>, String>,
@@ -3211,7 +3264,7 @@ pub mod builder {
         }
         pub fn description<T>(mut self, value: T) -> Self
         where
-            T: std::convert::TryInto<Option<super::LongString>>,
+            T: std::convert::TryInto<Option<super::LongText>>,
             T::Error: std::fmt::Display,
         {
             self.description = value
@@ -3386,6 +3439,7 @@ pub mod builder {
         manufacturers: Result<Vec<super::OrganisationShort>, String>,
         medallions: Result<Vec<super::Medallion>, String>,
         names: Result<Vec<super::ShortText>, String>,
+        origins: Result<Vec<super::RegionCode>, String>,
         product_ids: Result<super::ProductIds, String>,
     }
     impl Default for ProductFull {
@@ -3397,6 +3451,7 @@ pub mod builder {
                 manufacturers: Err("no value supplied for manufacturers".to_string()),
                 medallions: Err("no value supplied for medallions".to_string()),
                 names: Err("no value supplied for names".to_string()),
+                origins: Ok(Default::default()),
                 product_ids: Err("no value supplied for product_ids".to_string()),
             }
         }
@@ -3462,6 +3517,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for names: {}", e));
             self
         }
+        pub fn origins<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::RegionCode>>,
+            T::Error: std::fmt::Display,
+        {
+            self.origins = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for origins: {}", e));
+            self
+        }
         pub fn product_ids<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<super::ProductIds>,
@@ -3483,6 +3548,7 @@ pub mod builder {
                 manufacturers: value.manufacturers?,
                 medallions: value.medallions?,
                 names: value.names?,
+                origins: value.origins?,
                 product_ids: value.product_ids?,
             })
         }
@@ -3496,6 +3562,7 @@ pub mod builder {
                 manufacturers: Ok(value.manufacturers),
                 medallions: Ok(value.medallions),
                 names: Ok(value.names),
+                origins: Ok(value.origins),
                 product_ids: Ok(value.product_ids),
             }
         }
@@ -3624,7 +3691,7 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct ProductShort {
         badges: Result<Vec<super::BadgeName>, String>,
-        description: Result<Option<super::LongString>, String>,
+        description: Result<Option<super::LongText>, String>,
         name: Result<super::ShortString, String>,
         product_ids: Result<super::ProductIds, String>,
         scores: Result<Vec<super::Score>, String>,
@@ -3653,7 +3720,7 @@ pub mod builder {
         }
         pub fn description<T>(mut self, value: T) -> Self
         where
-            T: std::convert::TryInto<Option<super::LongString>>,
+            T: std::convert::TryInto<Option<super::LongText>>,
             T::Error: std::fmt::Display,
         {
             self.description = value

@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **descriptions** | [**Vec<models::LongText>**](longText.md) |  | 
 **images** | [**Vec<models::Image>**](image.md) |  | 
 **websites** | **Vec<models::ShortString>** |  | 
+**origins** | **Vec<models::RegionCode>** |  | [optional] [default to None]
 **products** | [**Vec<models::ProductShort>**](productShort.md) |  | 
 **medallions** | [**Vec<models::Medallion>**](medallion.md) |  | 
 
