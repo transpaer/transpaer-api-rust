@@ -7,6 +7,7 @@ Name | Type | Description | Notes
 **names** | [**Vec<models::ShortText>**](shortText.md) |  | 
 **descriptions** | [**Vec<models::LongText>**](longText.md) |  | 
 **images** | [**Vec<models::Image>**](image.md) |  | 
+**origins** | **Vec<models::RegionCode>** |  | [optional] [default to None]
 **manufacturers** | [**Vec<models::OrganisationShort>**](organisationShort.md) |  | 
 **alternatives** | [**Vec<models::CategoryAlternatives>**](categoryAlternatives.md) |  | 
 **medallions** | [**Vec<models::Medallion>**](medallion.md) |  | 

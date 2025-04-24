@@ -125,8 +125,8 @@
     "regionCode": {
       "description": "Code of a region.",
       "type": "string",
-      "minLength": 2,
-      "maxLength": 2
+      "minLength": 3,
+      "maxLength": 3
     },
     "shortString": {
       "description": "Short string for labels, titles, summaries...",
@@ -369,10 +369,14 @@
       "properties": {
         "id": {
           "$ref": "#/$defs/id"
+        },
+        "report_url": {
+          "$ref": "#/$defs/longString"
         }
       },
       "required": [
-        "id"
+        "id",
+        "report_url"
       ]
     },
     "euEcolabelMedallion": {
@@ -503,7 +507,7 @@
           "$ref": "#/$defs/shortString"
         },
         "description": {
-          "$ref": "#/$defs/longString"
+          "$ref": "#/$defs/longText"
         },
         "badges": {
           "type": "array",
@@ -556,6 +560,12 @@
             "$ref": "#/$defs/shortString"
           }
         },
+        "origins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/regionCode"
+          }
+        },
         "products": {
           "type": "array",
           "items": {
@@ -590,7 +600,7 @@
           "$ref": "#/$defs/shortString"
         },
         "description": {
-          "$ref": "#/$defs/longString"
+          "$ref": "#/$defs/longText"
         },
         "badges": {
           "type": "array",
@@ -635,6 +645,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/image"
+          }
+        },
+        "origins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/regionCode"
           }
         },
         "manufacturers": {
