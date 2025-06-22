@@ -22,6 +22,8 @@ docs/LongString.md
 docs/LongText.md
 docs/Medallion.md
 docs/MedallionVariant.md
+docs/Medium.md
+docs/Mention.md
 docs/OrganisationFull.md
 docs/OrganisationIdVariant.md
 docs/OrganisationIds.md
@@ -32,9 +34,11 @@ docs/ProductFull.md
 docs/ProductIdVariant.md
 docs/ProductIds.md
 docs/ProductShort.md
+docs/ReferenceLink.md
 docs/RegionCode.md
 docs/Score.md
 docs/ScorerName.md
+docs/ShoppingEntry.md
 docs/ShortString.md
 docs/ShortText.md
 docs/SustainityMedallion.md
@@ -45,6 +49,7 @@ docs/TcoMedallion.md
 docs/TextSearchLinkHack.md
 docs/TextSearchResult.md
 docs/TextSearchResults.md
+docs/VerifiedShop.md
 docs/default_api.md
 examples/ca.pem
 examples/client/client_auth.rs

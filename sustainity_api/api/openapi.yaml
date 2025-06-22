@@ -462,6 +462,7 @@ components:
       - info:main
       - info:for_producers
       - info:faq
+      - info:greenwashing
       - data:wiki
       - data:open_food_facts
       - cert:bcorp
@@ -482,6 +483,11 @@ components:
           - score: 0
             name: name
             wiki_id: wiki_id
+        links:
+        - link: link
+          title: title
+        - link: link
+          title: title
         id: info:main
         title: title
         article: article
@@ -500,11 +506,16 @@ components:
           description: "Long string for descriptions, articles..."
           maxLength: 1048576
           type: string
+        links:
+          items:
+            $ref: '#/components/schemas/referenceLink'
+          type: array
         presentation:
           $ref: '#/components/schemas/presentation'
       required:
       - article
       - id
+      - links
       - summary
       - title
       type: object
@@ -512,6 +523,20 @@ components:
       description: "Long string for descriptions, articles..."
       maxLength: 1048576
       type: string
+    referenceLink:
+      description: A reference link
+      example:
+        link: link
+        title: title
+      properties:
+        title:
+          type: string
+        link:
+          type: string
+      required:
+      - link
+      - title
+      type: object
     presentation:
       description: Additional data to present together with a library item.
       example:
@@ -562,9 +587,9 @@ components:
           source: null
         names:
         - text: text
-          source: wiki
+          source: sustainity
         - text: text
-          source: wiki
+          source: sustainity
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
@@ -624,6 +649,19 @@ components:
         websites:
         - null
         - null
+        media:
+        - mentions:
+          - link: link
+            title: title
+          - link: link
+            title: title
+          icon: icon
+        - mentions:
+          - link: link
+            title: title
+          - link: link
+            title: title
+          icon: icon
         descriptions:
         - text: text
           source: null
@@ -707,6 +745,10 @@ components:
           items:
             $ref: '#/components/schemas/regionCode'
           type: array
+        media:
+          items:
+            $ref: '#/components/schemas/medium'
+          type: array
         products:
           items:
             $ref: '#/components/schemas/productShort'
@@ -754,7 +796,7 @@ components:
       description: Short text with its source.
       example:
         text: text
-        source: wiki
+        source: sustainity
       properties:
         text:
           description: "Short string for labels, titles, summaries..."
@@ -769,6 +811,7 @@ components:
     dataSource:
       description: Describes where the related data was retrieved from.
       enum:
+      - sustainity
       - wiki
       - "off"
       - eu
@@ -812,6 +855,37 @@ components:
       maxLength: 3
       minLength: 3
       type: string
+    medium:
+      example:
+        mentions:
+        - link: link
+          title: title
+        - link: link
+          title: title
+        icon: icon
+      properties:
+        mentions:
+          items:
+            $ref: '#/components/schemas/mention'
+          type: array
+        icon:
+          type: string
+      required:
+      - mentions
+      type: object
+    mention:
+      example:
+        link: link
+        title: title
+      properties:
+        title:
+          type: string
+        link:
+          type: string
+      required:
+      - link
+      - title
+      type: object
     productShort:
       description: Extract from product data.
       example:
@@ -1130,9 +1204,9 @@ components:
           source: null
         names:
         - text: text
-          source: wiki
+          source: sustainity
         - text: text
-          source: wiki
+          source: sustainity
         manufacturers:
         - badges:
           - bcorp
@@ -1337,11 +1411,31 @@ components:
               text: text
               source: null
           category: category
+        media:
+        - mentions:
+          - link: link
+            title: title
+          - link: link
+            title: title
+          icon: icon
+        - mentions:
+          - link: link
+            title: title
+          - link: link
+            title: title
+          icon: icon
         descriptions:
         - text: text
           source: null
         - text: text
           source: null
+        shopping:
+        - shop: fairphone
+          link: link
+          description: description
+        - shop: fairphone
+          link: link
+          description: description
       properties:
         productIds:
           $ref: '#/components/schemas/productIds'
@@ -1373,14 +1467,24 @@ components:
           items:
             $ref: '#/components/schemas/medallion'
           type: array
+        shopping:
+          items:
+            $ref: '#/components/schemas/shoppingEntry'
+          type: array
+        media:
+          items:
+            $ref: '#/components/schemas/medium'
+          type: array
       required:
       - alternatives
       - descriptions
       - images
       - manufacturers
       - medallions
+      - media
       - names
       - productIds
+      - shopping
       type: object
     organisationShort:
       description: Extract from organisation data.
@@ -1490,4 +1594,30 @@ components:
       - alternatives
       - category
       type: object
+    shoppingEntry:
+      description: Describes a link to a shop
+      example:
+        shop: fairphone
+        link: link
+        description: description
+      properties:
+        shop:
+          $ref: '#/components/schemas/verifiedShop'
+        link:
+          type: string
+        description:
+          description: "Short string for labels, titles, summaries..."
+          maxLength: 1024
+          type: string
+      required:
+      - description
+      - link
+      - shop
+      type: object
+    verifiedShop:
+      description: Enumerates verified shops.
+      enum:
+      - fairphone
+      - amazon
+      type: string
 
