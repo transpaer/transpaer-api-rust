@@ -11,6 +11,8 @@ Name | Type | Description | Notes
 **manufacturers** | [**Vec<models::OrganisationShort>**](organisationShort.md) |  | 
 **alternatives** | [**Vec<models::CategoryAlternatives>**](categoryAlternatives.md) |  | 
 **medallions** | [**Vec<models::Medallion>**](medallion.md) |  | 
+**shopping** | [**Vec<models::ShoppingEntry>**](shoppingEntry.md) |  | 
+**media** | [**Vec<models::Medium>**](medium.md) |  | 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

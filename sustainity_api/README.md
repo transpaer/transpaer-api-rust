@@ -15,8 +15,8 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 0.4.0
-- Build date: 2025-04-24T13:55:56.950482+02:00[Europe/Amsterdam]
-- Generator version: 7.10.0
+- Build date: 2025-06-22T11:51:48.018438+02:00[Europe/Amsterdam]
+- Generator version: 7.13.0
 
 
 
@@ -154,6 +154,8 @@ Method | HTTP request | Description
  - [LongText](docs/LongText.md)
  - [Medallion](docs/Medallion.md)
  - [MedallionVariant](docs/MedallionVariant.md)
+ - [Medium](docs/Medium.md)
+ - [Mention](docs/Mention.md)
  - [OrganisationFull](docs/OrganisationFull.md)
  - [OrganisationIdVariant](docs/OrganisationIdVariant.md)
  - [OrganisationIds](docs/OrganisationIds.md)
@@ -164,9 +166,11 @@ Method | HTTP request | Description
  - [ProductIdVariant](docs/ProductIdVariant.md)
  - [ProductIds](docs/ProductIds.md)
  - [ProductShort](docs/ProductShort.md)
+ - [ReferenceLink](docs/ReferenceLink.md)
  - [RegionCode](docs/RegionCode.md)
  - [Score](docs/Score.md)
  - [ScorerName](docs/ScorerName.md)
+ - [ShoppingEntry](docs/ShoppingEntry.md)
  - [ShortString](docs/ShortString.md)
  - [ShortText](docs/ShortText.md)
  - [SustainityMedallion](docs/SustainityMedallion.md)
@@ -177,6 +181,7 @@ Method | HTTP request | Description
  - [TextSearchLinkHack](docs/TextSearchLinkHack.md)
  - [TextSearchResult](docs/TextSearchResult.md)
  - [TextSearchResults](docs/TextSearchResults.md)
+ - [VerifiedShop](docs/VerifiedShop.md)
 
 
 ## Documentation For Authorization

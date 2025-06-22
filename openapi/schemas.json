@@ -109,10 +109,43 @@
       "minimum": 0.0,
       "maximum": 1.0
     },
+    "mention": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "link"
+      ]
+    },
+    "medium": {
+      "type": "object",
+      "properties": {
+        "mentions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mention"
+          }
+        },
+        "icon": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "mentions"
+      ]
+    },
     "dataSource": {
       "description": "Describes where the related data was retrieved from.",
       "type": "string",
       "enum": [
+        "sustainity",
         "wiki",
         "off",
         "eu",
@@ -221,6 +254,22 @@
         "data"
       ]
     },
+    "referenceLink": {
+      "description": "A reference link",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "link": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title",
+        "link"
+      ]
+    },
     "libraryTopic": {
       "description": "Name of a topic in the library.",
       "type": "string",
@@ -228,6 +277,7 @@
         "info:main",
         "info:for_producers",
         "info:faq",
+        "info:greenwashing",
         "data:wiki",
         "data:open_food_facts",
         "cert:bcorp",
@@ -273,6 +323,12 @@
         "article": {
           "$ref": "#/$defs/longString"
         },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/referenceLink"
+          }
+        },
         "presentation": {
           "$ref": "#/$defs/presentation"
         }
@@ -281,7 +337,8 @@
         "id",
         "title",
         "summary",
-        "article"
+        "article",
+        "links"
       ]
     },
     "libraryContents": {
@@ -496,6 +553,34 @@
         "variant"
       ]
     },
+    "verifiedShop": {
+      "description": "Enumerates verified shops.",
+      "type": "string",
+      "enum": [
+        "fairphone",
+        "amazon"
+      ]
+    },
+    "shoppingEntry": {
+      "description": "Describes a link to a shop",
+      "type": "object",
+      "properties": {
+        "shop": {
+          "$ref": "#/$defs/verifiedShop"
+        },
+        "link": {
+          "type": "string"
+        },
+        "description": {
+          "$ref": "#/$defs/shortString"
+        }
+      },
+      "required": [
+        "shop",
+        "link",
+        "description"
+      ]
+    },
     "organisationShort": {
       "description": "Extract from organisation data.",
       "type": "object",
@@ -564,6 +649,12 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/regionCode"
+          }
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/medium"
           }
         },
         "products": {
@@ -670,6 +761,18 @@
           "items": {
             "$ref": "#/$defs/medallion"
           }
+        },
+        "shopping": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/shoppingEntry"
+          }
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/medium"
+          }
         }
       },
       "required": [
@@ -679,7 +782,9 @@
         "images",
         "manufacturers",
         "alternatives",
-        "medallions"
+        "medallions",
+        "shopping",
+        "media"
       ]
     },
     "categoryAlternatives": {

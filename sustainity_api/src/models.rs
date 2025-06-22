@@ -253,6 +253,7 @@ impl CategoryAlternatives {
 #[doc = "  \"description\": \"Describes where the related data was retrieved from.\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
+#[doc = "    \"sustainity\","]
 #[doc = "    \"wiki\","]
 #[doc = "    \"off\","]
 #[doc = "    \"eu\","]
@@ -266,6 +267,8 @@ impl CategoryAlternatives {
 #[doc = r" </details>"]
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum DataSource {
+    #[serde(rename = "sustainity")]
+    Sustainity,
     #[serde(rename = "wiki")]
     Wiki,
     #[serde(rename = "off")]
@@ -289,6 +292,7 @@ impl From<&DataSource> for DataSource {
 impl ToString for DataSource {
     fn to_string(&self) -> String {
         match *self {
+            Self::Sustainity => "sustainity".to_string(),
             Self::Wiki => "wiki".to_string(),
             Self::Off => "off".to_string(),
             Self::Eu => "eu".to_string(),
@@ -303,6 +307,7 @@ impl std::str::FromStr for DataSource {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
         match value {
+            "sustainity" => Ok(Self::Sustainity),
             "wiki" => Ok(Self::Wiki),
             "off" => Ok(Self::Off),
             "eu" => Ok(Self::Eu),
@@ -555,6 +560,7 @@ impl LibraryContents {
 #[doc = "  \"required\": ["]
 #[doc = "    \"article\","]
 #[doc = "    \"id\","]
+#[doc = "    \"links\","]
 #[doc = "    \"summary\","]
 #[doc = "    \"title\""]
 #[doc = "  ],"]
@@ -564,6 +570,12 @@ impl LibraryContents {
 #[doc = "    },"]
 #[doc = "    \"id\": {"]
 #[doc = "      \"$ref\": \"#/$defs/libraryTopic\""]
+#[doc = "    },"]
+#[doc = "    \"links\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/referenceLink\""]
+#[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"presentation\": {"]
 #[doc = "      \"$ref\": \"#/$defs/presentation\""]
@@ -582,6 +594,7 @@ impl LibraryContents {
 pub struct LibraryItemFull {
     pub article: LongString,
     pub id: LibraryTopic,
+    pub links: Vec<ReferenceLink>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub presentation: Option<Presentation>,
     pub summary: ShortString,
@@ -652,6 +665,7 @@ impl LibraryItemShort {
 #[doc = "    \"info:main\","]
 #[doc = "    \"info:for_producers\","]
 #[doc = "    \"info:faq\","]
+#[doc = "    \"info:greenwashing\","]
 #[doc = "    \"data:wiki\","]
 #[doc = "    \"data:open_food_facts\","]
 #[doc = "    \"cert:bcorp\","]
@@ -671,6 +685,8 @@ pub enum LibraryTopic {
     InfoForProducers,
     #[serde(rename = "info:faq")]
     InfoFaq,
+    #[serde(rename = "info:greenwashing")]
+    InfoGreenwashing,
     #[serde(rename = "data:wiki")]
     DataWiki,
     #[serde(rename = "data:open_food_facts")]
@@ -697,6 +713,7 @@ impl ToString for LibraryTopic {
             Self::InfoMain => "info:main".to_string(),
             Self::InfoForProducers => "info:for_producers".to_string(),
             Self::InfoFaq => "info:faq".to_string(),
+            Self::InfoGreenwashing => "info:greenwashing".to_string(),
             Self::DataWiki => "data:wiki".to_string(),
             Self::DataOpenFoodFacts => "data:open_food_facts".to_string(),
             Self::CertBcorp => "cert:bcorp".to_string(),
@@ -714,6 +731,7 @@ impl std::str::FromStr for LibraryTopic {
             "info:main" => Ok(Self::InfoMain),
             "info:for_producers" => Ok(Self::InfoForProducers),
             "info:faq" => Ok(Self::InfoFaq),
+            "info:greenwashing" => Ok(Self::InfoGreenwashing),
             "data:wiki" => Ok(Self::DataWiki),
             "data:open_food_facts" => Ok(Self::DataOpenFoodFacts),
             "cert:bcorp" => Ok(Self::CertBcorp),
@@ -990,6 +1008,83 @@ impl std::convert::TryFrom<String> for MedallionVariant {
         value.parse()
     }
 }
+#[doc = "Medium"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"mentions\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"icon\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"mentions\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/mention\""]
+#[doc = "      }"]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct Medium {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub icon: Option<String>,
+    pub mentions: Vec<Mention>,
+}
+impl From<&Medium> for Medium {
+    fn from(value: &Medium) -> Self {
+        value.clone()
+    }
+}
+impl Medium {
+    pub fn builder() -> builder::Medium {
+        Default::default()
+    }
+}
+#[doc = "Mention"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"link\","]
+#[doc = "    \"title\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"link\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"title\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct Mention {
+    pub link: String,
+    pub title: String,
+}
+impl From<&Mention> for Mention {
+    fn from(value: &Mention) -> Self {
+        value.clone()
+    }
+}
+impl Mention {
+    pub fn builder() -> builder::Mention {
+        Default::default()
+    }
+}
 #[doc = "Full organisation data."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1024,6 +1119,12 @@ impl std::convert::TryFrom<String> for MedallionVariant {
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
 #[doc = "        \"$ref\": \"#/$defs/medallion\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"media\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/medium\""]
 #[doc = "      }"]
 #[doc = "    },"]
 #[doc = "    \"names\": {"]
@@ -1062,6 +1163,8 @@ pub struct OrganisationFull {
     pub descriptions: Vec<LongText>,
     pub images: Vec<Image>,
     pub medallions: Vec<Medallion>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub media: Vec<Medium>,
     pub names: Vec<ShortText>,
     #[serde(rename = "organisationIds")]
     pub organisation_ids: OrganisationIds,
@@ -1388,8 +1491,10 @@ impl PresentationEntry {
 #[doc = "    \"images\","]
 #[doc = "    \"manufacturers\","]
 #[doc = "    \"medallions\","]
+#[doc = "    \"media\","]
 #[doc = "    \"names\","]
-#[doc = "    \"productIds\""]
+#[doc = "    \"productIds\","]
+#[doc = "    \"shopping\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"alternatives\": {"]
@@ -1422,6 +1527,12 @@ impl PresentationEntry {
 #[doc = "        \"$ref\": \"#/$defs/medallion\""]
 #[doc = "      }"]
 #[doc = "    },"]
+#[doc = "    \"media\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/medium\""]
+#[doc = "      }"]
+#[doc = "    },"]
 #[doc = "    \"names\": {"]
 #[doc = "      \"type\": \"array\","]
 #[doc = "      \"items\": {"]
@@ -1436,6 +1547,12 @@ impl PresentationEntry {
 #[doc = "    },"]
 #[doc = "    \"productIds\": {"]
 #[doc = "      \"$ref\": \"#/$defs/productIds\""]
+#[doc = "    },"]
+#[doc = "    \"shopping\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/shoppingEntry\""]
+#[doc = "      }"]
 #[doc = "    }"]
 #[doc = "  }"]
 #[doc = "}"]
@@ -1448,11 +1565,13 @@ pub struct ProductFull {
     pub images: Vec<Image>,
     pub manufacturers: Vec<OrganisationShort>,
     pub medallions: Vec<Medallion>,
+    pub media: Vec<Medium>,
     pub names: Vec<ShortText>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub origins: Vec<RegionCode>,
     #[serde(rename = "productIds")]
     pub product_ids: ProductIds,
+    pub shopping: Vec<ShoppingEntry>,
 }
 impl From<&ProductFull> for ProductFull {
     fn from(value: &ProductFull) -> Self {
@@ -1679,6 +1798,44 @@ impl ProductShort {
         Default::default()
     }
 }
+#[doc = "A reference link"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"A reference link\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"link\","]
+#[doc = "    \"title\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"link\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"title\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ReferenceLink {
+    pub link: String,
+    pub title: String,
+}
+impl From<&ReferenceLink> for ReferenceLink {
+    fn from(value: &ReferenceLink) -> Self {
+        value.clone()
+    }
+}
+impl ReferenceLink {
+    pub fn builder() -> builder::ReferenceLink {
+        Default::default()
+    }
+}
 #[doc = "Code of a region."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1848,6 +2005,49 @@ impl std::convert::TryFrom<String> for ScorerName {
     type Error = self::error::ConversionError;
     fn try_from(value: String) -> Result<Self, self::error::ConversionError> {
         value.parse()
+    }
+}
+#[doc = "Describes a link to a shop"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Describes a link to a shop\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"description\","]
+#[doc = "    \"link\","]
+#[doc = "    \"shop\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"description\": {"]
+#[doc = "      \"$ref\": \"#/$defs/shortString\""]
+#[doc = "    },"]
+#[doc = "    \"link\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"shop\": {"]
+#[doc = "      \"$ref\": \"#/$defs/verifiedShop\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ShoppingEntry {
+    pub description: ShortString,
+    pub link: String,
+    pub shop: VerifiedShop,
+}
+impl From<&ShoppingEntry> for ShoppingEntry {
+    fn from(value: &ShoppingEntry) -> Self {
+        value.clone()
+    }
+}
+impl ShoppingEntry {
+    pub fn builder() -> builder::ShoppingEntry {
+        Default::default()
     }
 }
 #[doc = "Short string for labels, titles, summaries..."]
@@ -2378,6 +2578,69 @@ impl TextSearchResults {
         Default::default()
     }
 }
+#[doc = "Enumerates verified shops."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Enumerates verified shops.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"fairphone\","]
+#[doc = "    \"amazon\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum VerifiedShop {
+    #[serde(rename = "fairphone")]
+    Fairphone,
+    #[serde(rename = "amazon")]
+    Amazon,
+}
+impl From<&VerifiedShop> for VerifiedShop {
+    fn from(value: &VerifiedShop) -> Self {
+        value.clone()
+    }
+}
+impl ToString for VerifiedShop {
+    fn to_string(&self) -> String {
+        match *self {
+            Self::Fairphone => "fairphone".to_string(),
+            Self::Amazon => "amazon".to_string(),
+        }
+    }
+}
+impl std::str::FromStr for VerifiedShop {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
+        match value {
+            "fairphone" => Ok(Self::Fairphone),
+            "amazon" => Ok(Self::Amazon),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl std::convert::TryFrom<&str> for VerifiedShop {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<&String> for VerifiedShop {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<String> for VerifiedShop {
+    type Error = self::error::ConversionError;
+    fn try_from(value: String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
 #[doc = r" Types for composing complex structures."]
 pub mod builder {
     #[derive(Clone, Debug)]
@@ -2654,6 +2917,7 @@ pub mod builder {
     pub struct LibraryItemFull {
         article: Result<super::LongString, String>,
         id: Result<super::LibraryTopic, String>,
+        links: Result<Vec<super::ReferenceLink>, String>,
         presentation: Result<Option<super::Presentation>, String>,
         summary: Result<super::ShortString, String>,
         title: Result<super::ShortString, String>,
@@ -2663,6 +2927,7 @@ pub mod builder {
             Self {
                 article: Err("no value supplied for article".to_string()),
                 id: Err("no value supplied for id".to_string()),
+                links: Err("no value supplied for links".to_string()),
                 presentation: Ok(Default::default()),
                 summary: Err("no value supplied for summary".to_string()),
                 title: Err("no value supplied for title".to_string()),
@@ -2688,6 +2953,16 @@ pub mod builder {
             self.id = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for id: {}", e));
+            self
+        }
+        pub fn links<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::ReferenceLink>>,
+            T::Error: std::fmt::Display,
+        {
+            self.links = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for links: {}", e));
             self
         }
         pub fn presentation<T>(mut self, value: T) -> Self
@@ -2727,6 +3002,7 @@ pub mod builder {
             Ok(Self {
                 article: value.article?,
                 id: value.id?,
+                links: value.links?,
                 presentation: value.presentation?,
                 summary: value.summary?,
                 title: value.title?,
@@ -2738,6 +3014,7 @@ pub mod builder {
             Self {
                 article: Ok(value.article),
                 id: Ok(value.id),
+                links: Ok(value.links),
                 presentation: Ok(value.presentation),
                 summary: Ok(value.summary),
                 title: Ok(value.title),
@@ -2971,10 +3248,115 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct Medium {
+        icon: Result<Option<String>, String>,
+        mentions: Result<Vec<super::Mention>, String>,
+    }
+    impl Default for Medium {
+        fn default() -> Self {
+            Self {
+                icon: Ok(Default::default()),
+                mentions: Err("no value supplied for mentions".to_string()),
+            }
+        }
+    }
+    impl Medium {
+        pub fn icon<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Option<String>>,
+            T::Error: std::fmt::Display,
+        {
+            self.icon = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for icon: {}", e));
+            self
+        }
+        pub fn mentions<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::Mention>>,
+            T::Error: std::fmt::Display,
+        {
+            self.mentions = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for mentions: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<Medium> for super::Medium {
+        type Error = super::error::ConversionError;
+        fn try_from(value: Medium) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                icon: value.icon?,
+                mentions: value.mentions?,
+            })
+        }
+    }
+    impl From<super::Medium> for Medium {
+        fn from(value: super::Medium) -> Self {
+            Self {
+                icon: Ok(value.icon),
+                mentions: Ok(value.mentions),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct Mention {
+        link: Result<String, String>,
+        title: Result<String, String>,
+    }
+    impl Default for Mention {
+        fn default() -> Self {
+            Self {
+                link: Err("no value supplied for link".to_string()),
+                title: Err("no value supplied for title".to_string()),
+            }
+        }
+    }
+    impl Mention {
+        pub fn link<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.link = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for link: {}", e));
+            self
+        }
+        pub fn title<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.title = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for title: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<Mention> for super::Mention {
+        type Error = super::error::ConversionError;
+        fn try_from(value: Mention) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                link: value.link?,
+                title: value.title?,
+            })
+        }
+    }
+    impl From<super::Mention> for Mention {
+        fn from(value: super::Mention) -> Self {
+            Self {
+                link: Ok(value.link),
+                title: Ok(value.title),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct OrganisationFull {
         descriptions: Result<Vec<super::LongText>, String>,
         images: Result<Vec<super::Image>, String>,
         medallions: Result<Vec<super::Medallion>, String>,
+        media: Result<Vec<super::Medium>, String>,
         names: Result<Vec<super::ShortText>, String>,
         organisation_ids: Result<super::OrganisationIds, String>,
         origins: Result<Vec<super::RegionCode>, String>,
@@ -2987,6 +3369,7 @@ pub mod builder {
                 descriptions: Err("no value supplied for descriptions".to_string()),
                 images: Err("no value supplied for images".to_string()),
                 medallions: Err("no value supplied for medallions".to_string()),
+                media: Ok(Default::default()),
                 names: Err("no value supplied for names".to_string()),
                 organisation_ids: Err("no value supplied for organisation_ids".to_string()),
                 origins: Ok(Default::default()),
@@ -3024,6 +3407,16 @@ pub mod builder {
             self.medallions = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for medallions: {}", e));
+            self
+        }
+        pub fn media<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::Medium>>,
+            T::Error: std::fmt::Display,
+        {
+            self.media = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for media: {}", e));
             self
         }
         pub fn names<T>(mut self, value: T) -> Self
@@ -3087,6 +3480,7 @@ pub mod builder {
                 descriptions: value.descriptions?,
                 images: value.images?,
                 medallions: value.medallions?,
+                media: value.media?,
                 names: value.names?,
                 organisation_ids: value.organisation_ids?,
                 origins: value.origins?,
@@ -3101,6 +3495,7 @@ pub mod builder {
                 descriptions: Ok(value.descriptions),
                 images: Ok(value.images),
                 medallions: Ok(value.medallions),
+                media: Ok(value.media),
                 names: Ok(value.names),
                 organisation_ids: Ok(value.organisation_ids),
                 origins: Ok(value.origins),
@@ -3438,9 +3833,11 @@ pub mod builder {
         images: Result<Vec<super::Image>, String>,
         manufacturers: Result<Vec<super::OrganisationShort>, String>,
         medallions: Result<Vec<super::Medallion>, String>,
+        media: Result<Vec<super::Medium>, String>,
         names: Result<Vec<super::ShortText>, String>,
         origins: Result<Vec<super::RegionCode>, String>,
         product_ids: Result<super::ProductIds, String>,
+        shopping: Result<Vec<super::ShoppingEntry>, String>,
     }
     impl Default for ProductFull {
         fn default() -> Self {
@@ -3450,9 +3847,11 @@ pub mod builder {
                 images: Err("no value supplied for images".to_string()),
                 manufacturers: Err("no value supplied for manufacturers".to_string()),
                 medallions: Err("no value supplied for medallions".to_string()),
+                media: Err("no value supplied for media".to_string()),
                 names: Err("no value supplied for names".to_string()),
                 origins: Ok(Default::default()),
                 product_ids: Err("no value supplied for product_ids".to_string()),
+                shopping: Err("no value supplied for shopping".to_string()),
             }
         }
     }
@@ -3507,6 +3906,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for medallions: {}", e));
             self
         }
+        pub fn media<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::Medium>>,
+            T::Error: std::fmt::Display,
+        {
+            self.media = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for media: {}", e));
+            self
+        }
         pub fn names<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<Vec<super::ShortText>>,
@@ -3537,6 +3946,16 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for product_ids: {}", e));
             self
         }
+        pub fn shopping<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::ShoppingEntry>>,
+            T::Error: std::fmt::Display,
+        {
+            self.shopping = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for shopping: {}", e));
+            self
+        }
     }
     impl std::convert::TryFrom<ProductFull> for super::ProductFull {
         type Error = super::error::ConversionError;
@@ -3547,9 +3966,11 @@ pub mod builder {
                 images: value.images?,
                 manufacturers: value.manufacturers?,
                 medallions: value.medallions?,
+                media: value.media?,
                 names: value.names?,
                 origins: value.origins?,
                 product_ids: value.product_ids?,
+                shopping: value.shopping?,
             })
         }
     }
@@ -3561,9 +3982,11 @@ pub mod builder {
                 images: Ok(value.images),
                 manufacturers: Ok(value.manufacturers),
                 medallions: Ok(value.medallions),
+                media: Ok(value.media),
                 names: Ok(value.names),
                 origins: Ok(value.origins),
                 product_ids: Ok(value.product_ids),
+                shopping: Ok(value.shopping),
             }
         }
     }
@@ -3783,6 +4206,58 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
+    pub struct ReferenceLink {
+        link: Result<String, String>,
+        title: Result<String, String>,
+    }
+    impl Default for ReferenceLink {
+        fn default() -> Self {
+            Self {
+                link: Err("no value supplied for link".to_string()),
+                title: Err("no value supplied for title".to_string()),
+            }
+        }
+    }
+    impl ReferenceLink {
+        pub fn link<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.link = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for link: {}", e));
+            self
+        }
+        pub fn title<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.title = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for title: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<ReferenceLink> for super::ReferenceLink {
+        type Error = super::error::ConversionError;
+        fn try_from(value: ReferenceLink) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                link: value.link?,
+                title: value.title?,
+            })
+        }
+    }
+    impl From<super::ReferenceLink> for ReferenceLink {
+        fn from(value: super::ReferenceLink) -> Self {
+            Self {
+                link: Ok(value.link),
+                title: Ok(value.title),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
     pub struct Score {
         score: Result<i64, String>,
         scorer_name: Result<super::ScorerName, String>,
@@ -3831,6 +4306,72 @@ pub mod builder {
             Self {
                 score: Ok(value.score),
                 scorer_name: Ok(value.scorer_name),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct ShoppingEntry {
+        description: Result<super::ShortString, String>,
+        link: Result<String, String>,
+        shop: Result<super::VerifiedShop, String>,
+    }
+    impl Default for ShoppingEntry {
+        fn default() -> Self {
+            Self {
+                description: Err("no value supplied for description".to_string()),
+                link: Err("no value supplied for link".to_string()),
+                shop: Err("no value supplied for shop".to_string()),
+            }
+        }
+    }
+    impl ShoppingEntry {
+        pub fn description<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::ShortString>,
+            T::Error: std::fmt::Display,
+        {
+            self.description = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for description: {}", e));
+            self
+        }
+        pub fn link<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.link = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for link: {}", e));
+            self
+        }
+        pub fn shop<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::VerifiedShop>,
+            T::Error: std::fmt::Display,
+        {
+            self.shop = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for shop: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<ShoppingEntry> for super::ShoppingEntry {
+        type Error = super::error::ConversionError;
+        fn try_from(value: ShoppingEntry) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                description: value.description?,
+                link: value.link?,
+                shop: value.shop?,
+            })
+        }
+    }
+    impl From<super::ShoppingEntry> for ShoppingEntry {
+        fn from(value: super::ShoppingEntry) -> Self {
+            Self {
+                description: Ok(value.description),
+                link: Ok(value.link),
+                shop: Ok(value.shop),
             }
         }
     }

@@ -56,26 +56,26 @@ mod paths {
             regex::Regex::new(r"^/library/(?P<topic>[^/?#]*)$")
                 .expect("Unable to create regex for LIBRARY_TOPIC");
     }
-    pub(crate) static ID_ORGANISATION_ORGANISATIONIDVARIANTID: usize = 3;
+    pub(crate) static ID_ORGANISATION_ORGANISATIONIDVARIANT_ID: usize = 3;
     lazy_static! {
-        pub static ref REGEX_ORGANISATION_ORGANISATIONIDVARIANTID: regex::Regex =
+        pub static ref REGEX_ORGANISATION_ORGANISATIONIDVARIANT_ID: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/organisation/(?P<organisationIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
-                .expect("Unable to create regex for ORGANISATION_ORGANISATIONIDVARIANTID");
+                .expect("Unable to create regex for ORGANISATION_ORGANISATIONIDVARIANT_ID");
     }
-    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANTID: usize = 4;
+    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID: usize = 4;
     lazy_static! {
-        pub static ref REGEX_PRODUCT_PRODUCTIDVARIANTID: regex::Regex =
+        pub static ref REGEX_PRODUCT_PRODUCTIDVARIANT_ID: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
-                .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANTID");
+                .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANT_ID");
     }
-    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES: usize = 5;
+    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES: usize = 5;
     lazy_static! {
-        pub static ref REGEX_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES: regex::Regex =
+        pub static ref REGEX_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)/alternatives$")
-                .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES");
+                .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES");
     }
     pub(crate) static ID_SEARCH_TEXT: usize = 6;
 }
@@ -639,14 +639,14 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             },
 
             // GetAlternatives - GET /product/{productIdVariant}:{id}/alternatives
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES) => {
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES) => {
                 // Path parameters
                 let path: &str = uri.path();
                 let path_params =
-                    paths::REGEX_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES
+                    paths::REGEX_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES
                     .captures(path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES.as_str())
+                        panic!("Path {} matched RE PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES.as_str())
                     );
 
                 let param_product_id_variant = match percent_encoding::percent_decode(path_params["productIdVariant"].as_bytes()).decode_utf8() {
@@ -842,14 +842,14 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             },
 
             // GetOrganisation - GET /organisation/{organisationIdVariant}:{id}
-            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => {
+            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANT_ID) => {
                 // Path parameters
                 let path: &str = uri.path();
                 let path_params =
-                    paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANTID
+                    paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANT_ID
                     .captures(path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE ORGANISATION_ORGANISATIONIDVARIANTID in set but failed match against \"{}\"", path, paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANTID.as_str())
+                        panic!("Path {} matched RE ORGANISATION_ORGANISATIONIDVARIANT_ID in set but failed match against \"{}\"", path, paths::REGEX_ORGANISATION_ORGANISATIONIDVARIANT_ID.as_str())
                     );
 
                 let param_organisation_id_variant = match percent_encoding::percent_decode(path_params["organisationIdVariant"].as_bytes()).decode_utf8() {
@@ -1024,14 +1024,14 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             },
 
             // GetProduct - GET /product/{productIdVariant}:{id}
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => {
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID) => {
                 // Path parameters
                 let path: &str = uri.path();
                 let path_params =
-                    paths::REGEX_PRODUCT_PRODUCTIDVARIANTID
+                    paths::REGEX_PRODUCT_PRODUCTIDVARIANT_ID
                     .captures(path)
                     .unwrap_or_else(||
-                        panic!("Path {} matched RE PRODUCT_PRODUCTIDVARIANTID in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_PRODUCTIDVARIANTID.as_str())
+                        panic!("Path {} matched RE PRODUCT_PRODUCTIDVARIANT_ID in set but failed match against \"{}\"", path, paths::REGEX_PRODUCT_PRODUCTIDVARIANT_ID.as_str())
                     );
 
                 let param_product_id_variant = match percent_encoding::percent_decode(path_params["productIdVariant"].as_bytes()).decode_utf8() {
@@ -1229,9 +1229,9 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             _ if path.matched(paths::ID_) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY_TOPIC) => method_not_allowed(),
-            _ if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => method_not_allowed(),
-            _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => method_not_allowed(),
-            _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES) => method_not_allowed(),
+            _ if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANT_ID) => method_not_allowed(),
+            _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID) => method_not_allowed(),
+            _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES) => method_not_allowed(),
             _ if path.matched(paths::ID_SEARCH_TEXT) => method_not_allowed(),
                 _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
                         .body(Body::empty())
@@ -1260,11 +1260,11 @@ impl<T> RequestParser<T> for ApiRequestParser {
             // GetLibraryItem - GET /library/{topic}
             hyper::Method::GET if path.matched(paths::ID_LIBRARY_TOPIC) => Some("GetLibraryItem"),
             // GetAlternatives - GET /product/{productIdVariant}:{id}/alternatives
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID_ALTERNATIVES) => Some("GetAlternatives"),
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES) => Some("GetAlternatives"),
             // GetOrganisation - GET /organisation/{organisationIdVariant}:{id}
-            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANTID) => Some("GetOrganisation"),
+            hyper::Method::GET if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANT_ID) => Some("GetOrganisation"),
             // GetProduct - GET /product/{productIdVariant}:{id}
-            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANTID) => Some("GetProduct"),
+            hyper::Method::GET if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID) => Some("GetProduct"),
             _ => None,
         }
     }
