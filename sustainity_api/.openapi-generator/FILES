@@ -8,7 +8,11 @@ bin/cli.rs
 docs/Accuracy.md
 docs/BCorpMedallion.md
 docs/BadgeName.md
+docs/Category.md
 docs/CategoryAlternatives.md
+docs/CategoryFull.md
+docs/CategoryShort.md
+docs/CategoryStatus.md
 docs/DataSource.md
 docs/EuEcolabelMedallion.md
 docs/FtiMedallion.md

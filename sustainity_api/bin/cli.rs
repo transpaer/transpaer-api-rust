@@ -8,6 +8,7 @@ use sustainity_api::{
     CheckHealthResponse,
     GetLibraryResponse,
     SearchByTextResponse,
+    GetCategoryResponse,
     GetLibraryItemResponse,
     GetAlternativesResponse,
     GetOrganisationResponse,
@@ -73,6 +74,11 @@ enum Operation {
     SearchByText {
         /// Text query for search.
         query: String,
+    },
+    /// Get category.
+    GetCategory {
+        /// Category path.
+        category: String,
     },
     /// Get library item.
     GetLibraryItem {
@@ -250,6 +256,63 @@ async fn main() -> Result<()> {
                 => "Ok\n".to_string()
                    +
                     &format!("body: {}\n", serde_json::to_string_pretty(&body)?) +
+                    &format!(
+                        "access_control_allow_origin: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_origin)?
+                    ) +
+                    &format!(
+                        "access_control_allow_methods: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_methods)?
+                    ) +
+                    &format!(
+                        "access_control_allow_headers: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_headers)?
+                    ),
+            }
+        }
+        Operation::GetCategory {
+            category,
+        } => {
+            info!("Performing a GetCategory request on {:?}", (
+                &category
+            ));
+
+            let result = client.get_category(
+                category,
+            ).await?;
+            debug!("Result: {:?}", result);
+
+            match result {
+                GetCategoryResponse::Ok
+                {
+                    body,
+                    access_control_allow_origin,
+                    access_control_allow_methods,
+                    access_control_allow_headers,
+                }
+                => "Ok\n".to_string()
+                   +
+                    &format!("body: {}\n", serde_json::to_string_pretty(&body)?) +
+                    &format!(
+                        "access_control_allow_origin: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_origin)?
+                    ) +
+                    &format!(
+                        "access_control_allow_methods: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_methods)?
+                    ) +
+                    &format!(
+                        "access_control_allow_headers: {}\n",
+                        serde_json::to_string_pretty(&access_control_allow_headers)?
+                    ),
+                GetCategoryResponse::NotFound
+                {
+                    access_control_allow_origin,
+                    access_control_allow_methods,
+                    access_control_allow_headers,
+                }
+                => "NotFound\n".to_string()
+                    +
                     &format!(
                         "access_control_allow_origin: {}\n",
                         serde_json::to_string_pretty(&access_control_allow_origin)?

@@ -72,6 +72,37 @@ pub enum SearchByTextResponse {
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[must_use]
+pub enum GetCategoryResponse {
+    /// Ok
+    Ok
+    {
+        body: models::CategoryFull,
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+    ,
+    /// Not found
+    NotFound
+    {
+        access_control_allow_origin:
+        String
+        ,
+        access_control_allow_methods:
+        String
+        ,
+        access_control_allow_headers:
+        String
+    }
+}
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[must_use]
 pub enum GetLibraryItemResponse {
     /// Ok
     Ok
@@ -218,6 +249,12 @@ pub trait Api<C: Send + Sync> {
         query: String,
         context: &C) -> Result<SearchByTextResponse, ApiError>;
 
+    /// Get category.
+    async fn get_category(
+        &self,
+        category: String,
+        context: &C) -> Result<GetCategoryResponse, ApiError>;
+
     /// Get library item.
     async fn get_library_item(
         &self,
@@ -273,6 +310,12 @@ pub trait ApiNoContext<C: Send + Sync> {
         &self,
         query: String,
         ) -> Result<SearchByTextResponse, ApiError>;
+
+    /// Get category.
+    async fn get_category(
+        &self,
+        category: String,
+        ) -> Result<GetCategoryResponse, ApiError>;
 
     /// Get library item.
     async fn get_library_item(
@@ -354,6 +397,16 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     {
         let context = self.context().clone();
         self.api().search_by_text(query, &context).await
+    }
+
+    /// Get category.
+    async fn get_category(
+        &self,
+        category: String,
+        ) -> Result<GetCategoryResponse, ApiError>
+    {
+        let context = self.context().clone();
+        self.api().get_category(category, &context).await
     }
 
     /// Get library item.

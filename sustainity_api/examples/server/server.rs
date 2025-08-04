@@ -105,6 +105,7 @@ use sustainity_api::{
     CheckHealthResponse,
     GetLibraryResponse,
     SearchByTextResponse,
+    GetCategoryResponse,
     GetLibraryItemResponse,
     GetAlternativesResponse,
     GetOrganisationResponse,
@@ -142,6 +143,16 @@ impl<C> Api<C> for Server<C> where C: Has<XSpanIdString> + Send + Sync
         context: &C) -> Result<SearchByTextResponse, ApiError>
     {
         info!("search_by_text(\"{}\") - X-Span-ID: {:?}", query, context.get().0.clone());
+        Err(ApiError("Api-Error: Operation is NOT implemented".into()))
+    }
+
+    /// Get category.
+    async fn get_category(
+        &self,
+        category: String,
+        context: &C) -> Result<GetCategoryResponse, ApiError>
+    {
+        info!("get_category(\"{}\") - X-Span-ID: {:?}", category, context.get().0.clone());
         Err(ApiError("Api-Error: Operation is NOT implemented".into()))
     }
 

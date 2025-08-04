@@ -39,6 +39,7 @@ use crate::{Api,
      CheckHealthResponse,
      GetLibraryResponse,
      SearchByTextResponse,
+     GetCategoryResponse,
      GetLibraryItemResponse,
      GetAlternativesResponse,
      GetOrganisationResponse,
@@ -730,6 +731,186 @@ impl<S, C> Api<C> for Client<S, C> where
                 Ok(SearchByTextResponse::Ok
                     {
                         body,
+                        access_control_allow_origin: response_access_control_allow_origin,
+                        access_control_allow_methods: response_access_control_allow_methods,
+                        access_control_allow_headers: response_access_control_allow_headers,
+                    }
+                )
+            }
+            code => {
+                let headers = response.headers().clone();
+                let body = response.into_body()
+                       .take(100)
+                       .into_raw().await;
+                Err(ApiError(format!("Unexpected response code {}:\n{:?}\n\n{}",
+                    code,
+                    headers,
+                    match body {
+                        Ok(body) => match String::from_utf8(body) {
+                            Ok(body) => body,
+                            Err(e) => format!("<Body was not UTF8: {:?}>", e),
+                        },
+                        Err(e) => format!("<Failed to read body: {}>", e),
+                    }
+                )))
+            }
+        }
+    }
+
+    async fn get_category(
+        &self,
+        param_category: String,
+        context: &C) -> Result<GetCategoryResponse, ApiError>
+    {
+        let mut client_service = self.client_service.clone();
+        let mut uri = format!(
+            "{}/category/{category}",
+            self.base_path
+            ,category=utf8_percent_encode(&param_category.to_string(), ID_ENCODE_SET)
+        );
+
+        // Query parameters
+        let query_string = {
+            let mut query_string = form_urlencoded::Serializer::new("".to_owned());
+            query_string.finish()
+        };
+        if !query_string.is_empty() {
+            uri += "?";
+            uri += &query_string;
+        }
+
+        let uri = match Uri::from_str(&uri) {
+            Ok(uri) => uri,
+            Err(err) => return Err(ApiError(format!("Unable to build URI: {}", err))),
+        };
+
+        let mut request = match Request::builder()
+            .method("GET")
+            .uri(uri)
+            .body(Body::empty()) {
+                Ok(req) => req,
+                Err(e) => return Err(ApiError(format!("Unable to create request: {}", e)))
+        };
+
+        let header = HeaderValue::from_str(Has::<XSpanIdString>::get(context).0.as_str());
+        request.headers_mut().insert(HeaderName::from_static("x-span-id"), match header {
+            Ok(h) => h,
+            Err(e) => return Err(ApiError(format!("Unable to create X-Span ID header value: {}", e)))
+        });
+
+        let response = client_service.call((request, context.clone()))
+            .map_err(|e| ApiError(format!("No response received: {}", e))).await?;
+
+        match response.status().as_u16() {
+            200 => {
+                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
+                    Some(response_access_control_allow_origin) => {
+                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
+                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_origin.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
+                    Some(response_access_control_allow_methods) => {
+                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
+                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_methods.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 200 was not found."))),
+                };
+
+                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
+                    Some(response_access_control_allow_headers) => {
+                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
+                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 200 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_headers.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 200 was not found."))),
+                };
+
+                let body = response.into_body();
+                let body = body
+                        .into_raw()
+                        .map_err(|e| ApiError(format!("Failed to read response: {}", e))).await?;
+
+                let body = str::from_utf8(&body)
+                    .map_err(|e| ApiError(format!("Response was not valid UTF8: {}", e)))?;
+                let body = serde_json::from_str::<models::CategoryFull>(body)
+                    .map_err(|e| ApiError(format!("Response body did not match the schema: {}", e)))?;
+
+
+                Ok(GetCategoryResponse::Ok
+                    {
+                        body,
+                        access_control_allow_origin: response_access_control_allow_origin,
+                        access_control_allow_methods: response_access_control_allow_methods,
+                        access_control_allow_headers: response_access_control_allow_headers,
+                    }
+                )
+            }
+            404 => {
+                let response_access_control_allow_origin = match response.headers().get(HeaderName::from_static("access-control-allow-origin")) {
+                    Some(response_access_control_allow_origin) => {
+                        let response_access_control_allow_origin = response_access_control_allow_origin.clone();
+                        let response_access_control_allow_origin = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_origin) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Origin for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_origin.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Origin for response 404 was not found."))),
+                };
+
+                let response_access_control_allow_methods = match response.headers().get(HeaderName::from_static("access-control-allow-methods")) {
+                    Some(response_access_control_allow_methods) => {
+                        let response_access_control_allow_methods = response_access_control_allow_methods.clone();
+                        let response_access_control_allow_methods = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_methods) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Methods for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_methods.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Methods for response 404 was not found."))),
+                };
+
+                let response_access_control_allow_headers = match response.headers().get(HeaderName::from_static("access-control-allow-headers")) {
+                    Some(response_access_control_allow_headers) => {
+                        let response_access_control_allow_headers = response_access_control_allow_headers.clone();
+                        let response_access_control_allow_headers = match TryInto::<header::IntoHeaderValue<String>>::try_into(response_access_control_allow_headers) {
+                            Ok(value) => value,
+                            Err(e) => {
+                                return Err(ApiError(format!("Invalid response header Access-Control-Allow-Headers for response 404 - {}", e)));
+                            },
+                        };
+                        response_access_control_allow_headers.0
+                        },
+                    None => return Err(ApiError(String::from("Required response header Access-Control-Allow-Headers for response 404 was not found."))),
+                };
+
+                Ok(
+                    GetCategoryResponse::NotFound
+                    {
                         access_control_allow_origin: response_access_control_allow_origin,
                         access_control_allow_methods: response_access_control_allow_methods,
                         access_control_allow_headers: response_access_control_allow_headers,

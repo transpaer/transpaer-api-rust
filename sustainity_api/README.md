@@ -15,7 +15,7 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 0.4.0
-- Build date: 2025-06-22T11:51:48.018438+02:00[Europe/Amsterdam]
+- Build date: 2025-08-04T14:47:10.904927+02:00[Europe/Amsterdam]
 - Generator version: 7.13.0
 
 
@@ -91,6 +91,7 @@ To run a client, follow one of the following simple steps:
 cargo run --example client CheckHealth
 cargo run --example client GetLibrary
 cargo run --example client SearchByText
+cargo run --example client GetCategory
 ```
 
 ### HTTPS
@@ -129,6 +130,7 @@ Method | HTTP request | Description
 [**checkHealth**](docs/default_api.md#checkHealth) | **GET** / | Health check
 [**getLibrary**](docs/default_api.md#getLibrary) | **GET** /library | Get library contents.
 [**searchByText**](docs/default_api.md#searchByText) | **GET** /search/text | Text search.
+[**getCategory**](docs/default_api.md#getCategory) | **GET** /category/{category} | Get category.
 [**getLibraryItem**](docs/default_api.md#getLibraryItem) | **GET** /library/{topic} | Get library item.
 [**getAlternatives**](docs/default_api.md#getAlternatives) | **GET** /product/{productIdVariant}:{id}/alternatives | Get product alternatives.
 [**getOrganisation**](docs/default_api.md#getOrganisation) | **GET** /organisation/{organisationIdVariant}:{id} | Get organisation.
@@ -140,7 +142,11 @@ Method | HTTP request | Description
  - [Accuracy](docs/Accuracy.md)
  - [BCorpMedallion](docs/BCorpMedallion.md)
  - [BadgeName](docs/BadgeName.md)
+ - [Category](docs/Category.md)
  - [CategoryAlternatives](docs/CategoryAlternatives.md)
+ - [CategoryFull](docs/CategoryFull.md)
+ - [CategoryShort](docs/CategoryShort.md)
+ - [CategoryStatus](docs/CategoryStatus.md)
  - [DataSource](docs/DataSource.md)
  - [EuEcolabelMedallion](docs/EuEcolabelMedallion.md)
  - [FtiMedallion](docs/FtiMedallion.md)
