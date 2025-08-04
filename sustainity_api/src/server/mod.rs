@@ -24,6 +24,7 @@ use crate::{Api,
      CheckHealthResponse,
      GetLibraryResponse,
      SearchByTextResponse,
+     GetCategoryResponse,
      GetLibraryItemResponse,
      GetAlternativesResponse,
      GetOrganisationResponse,
@@ -38,6 +39,7 @@ mod paths {
     lazy_static! {
         pub static ref GLOBAL_REGEX_SET: regex::RegexSet = regex::RegexSet::new(vec![
             r"^/$",
+            r"^/category/(?P<category>[^/?#]*)$",
             r"^/library$",
             r"^/library/(?P<topic>[^/?#]*)$",
             r"^/organisation/(?P<organisationIdVariant>[^/?#]*):(?P<id>[^/?#]*)$",
@@ -48,36 +50,43 @@ mod paths {
         .expect("Unable to create global regex set");
     }
     pub(crate) static ID_: usize = 0;
-    pub(crate) static ID_LIBRARY: usize = 1;
-    pub(crate) static ID_LIBRARY_TOPIC: usize = 2;
+    pub(crate) static ID_CATEGORY_CATEGORY: usize = 1;
+    lazy_static! {
+        pub static ref REGEX_CATEGORY_CATEGORY: regex::Regex =
+            #[allow(clippy::invalid_regex)]
+            regex::Regex::new(r"^/category/(?P<category>[^/?#]*)$")
+                .expect("Unable to create regex for CATEGORY_CATEGORY");
+    }
+    pub(crate) static ID_LIBRARY: usize = 2;
+    pub(crate) static ID_LIBRARY_TOPIC: usize = 3;
     lazy_static! {
         pub static ref REGEX_LIBRARY_TOPIC: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/library/(?P<topic>[^/?#]*)$")
                 .expect("Unable to create regex for LIBRARY_TOPIC");
     }
-    pub(crate) static ID_ORGANISATION_ORGANISATIONIDVARIANT_ID: usize = 3;
+    pub(crate) static ID_ORGANISATION_ORGANISATIONIDVARIANT_ID: usize = 4;
     lazy_static! {
         pub static ref REGEX_ORGANISATION_ORGANISATIONIDVARIANT_ID: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/organisation/(?P<organisationIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
                 .expect("Unable to create regex for ORGANISATION_ORGANISATIONIDVARIANT_ID");
     }
-    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID: usize = 4;
+    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID: usize = 5;
     lazy_static! {
         pub static ref REGEX_PRODUCT_PRODUCTIDVARIANT_ID: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)$")
                 .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANT_ID");
     }
-    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES: usize = 5;
+    pub(crate) static ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES: usize = 6;
     lazy_static! {
         pub static ref REGEX_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES: regex::Regex =
             #[allow(clippy::invalid_regex)]
             regex::Regex::new(r"^/product/(?P<productIdVariant>[^/?#]*):(?P<id>[^/?#]*)/alternatives$")
                 .expect("Unable to create regex for PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES");
     }
-    pub(crate) static ID_SEARCH_TEXT: usize = 6;
+    pub(crate) static ID_SEARCH_TEXT: usize = 7;
 }
 
 
@@ -457,6 +466,173 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
                                                     *response.body_mut() = Body::from(body);
+
+                                                },
+                                            },
+                                            Err(_) => {
+                                                // Application code returned an error. This should not happen, as the implementation should
+                                                // return a valid response.
+                                                *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
+                                                *response.body_mut() = Body::from("An internal error occurred");
+                                            },
+                                        }
+
+                                        Ok(response)
+            },
+
+            // GetCategory - GET /category/{category}
+            hyper::Method::GET if path.matched(paths::ID_CATEGORY_CATEGORY) => {
+                // Path parameters
+                let path: &str = uri.path();
+                let path_params =
+                    paths::REGEX_CATEGORY_CATEGORY
+                    .captures(path)
+                    .unwrap_or_else(||
+                        panic!("Path {} matched RE CATEGORY_CATEGORY in set but failed match against \"{}\"", path, paths::REGEX_CATEGORY_CATEGORY.as_str())
+                    );
+
+                let param_category = match percent_encoding::percent_decode(path_params["category"].as_bytes()).decode_utf8() {
+                    Ok(param_category) => match param_category.parse::<String>() {
+                        Ok(param_category) => param_category,
+                        Err(e) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't parse path parameter category: {}", e)))
+                                        .expect("Unable to create Bad Request response for invalid path parameter")),
+                    },
+                    Err(_) => return Ok(Response::builder()
+                                        .status(StatusCode::BAD_REQUEST)
+                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["category"])))
+                                        .expect("Unable to create Bad Request response for invalid percent decode"))
+                };
+
+                                let result = api_impl.get_category(
+                                            param_category,
+                                        &context
+                                    ).await;
+                                let mut response = Response::new(Body::empty());
+                                response.headers_mut().insert(
+                                            HeaderName::from_static("x-span-id"),
+                                            HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
+                                                .expect("Unable to create X-Span-ID header value"));
+
+                                        match result {
+                                            Ok(rsp) => match rsp {
+                                                GetCategoryResponse::Ok
+                                                    {
+                                                        body,
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(200).expect("Unable to turn 200 into a StatusCode");
+
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
+                                                    response.headers_mut().insert(
+                                                        CONTENT_TYPE,
+                                                        HeaderValue::from_str("application/json")
+                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                    // JSON Body
+                                                    let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
+                                                    *response.body_mut() = Body::from(body);
+
+                                                },
+                                                GetCategoryResponse::NotFound
+                                                    {
+                                                        access_control_allow_origin,
+                                                        access_control_allow_methods,
+                                                        access_control_allow_headers
+                                                    }
+                                                => {
+                                                    *response.status_mut() = StatusCode::from_u16(404).expect("Unable to turn 404 into a StatusCode");
+
+                                                    let access_control_allow_origin = match header::IntoHeaderValue(access_control_allow_origin).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-origin"),
+                                                        access_control_allow_origin
+                                                    );
+
+                                                    let access_control_allow_methods = match header::IntoHeaderValue(access_control_allow_methods).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-methods"),
+                                                        access_control_allow_methods
+                                                    );
+
+                                                    let access_control_allow_headers = match header::IntoHeaderValue(access_control_allow_headers).try_into() {
+                                                        Ok(val) => val,
+                                                        Err(e) => {
+                                                            return Ok(Response::builder()
+                                                                    .status(StatusCode::INTERNAL_SERVER_ERROR)
+                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .expect("Unable to create Internal Server Error for invalid response header"))
+                                                        }
+                                                    };
+
+                                                    response.headers_mut().insert(
+                                                        HeaderName::from_static("access-control-allow-headers"),
+                                                        access_control_allow_headers
+                                                    );
 
                                                 },
                                             },
@@ -1227,6 +1403,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             },
 
             _ if path.matched(paths::ID_) => method_not_allowed(),
+            _ if path.matched(paths::ID_CATEGORY_CATEGORY) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY) => method_not_allowed(),
             _ if path.matched(paths::ID_LIBRARY_TOPIC) => method_not_allowed(),
             _ if path.matched(paths::ID_ORGANISATION_ORGANISATIONIDVARIANT_ID) => method_not_allowed(),
@@ -1257,6 +1434,8 @@ impl<T> RequestParser<T> for ApiRequestParser {
             hyper::Method::GET if path.matched(paths::ID_LIBRARY) => Some("GetLibrary"),
             // SearchByText - GET /search/text
             hyper::Method::GET if path.matched(paths::ID_SEARCH_TEXT) => Some("SearchByText"),
+            // GetCategory - GET /category/{category}
+            hyper::Method::GET if path.matched(paths::ID_CATEGORY_CATEGORY) => Some("GetCategory"),
             // GetLibraryItem - GET /library/{topic}
             hyper::Method::GET if path.matched(paths::ID_LIBRARY_TOPIC) => Some("GetLibraryItem"),
             // GetAlternatives - GET /product/{productIdVariant}:{id}/alternatives

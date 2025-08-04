@@ -259,6 +259,43 @@ paths:
             Access-Control-Allow-Headers:
               $ref: '#/components/headers/corsHeaders'
       summary: Get product alternatives.
+  /category/{category}:
+    get:
+      description: Returns full info about a specified category.
+      operationId: getCategory
+      parameters:
+      - description: Category path.
+        explode: false
+        in: path
+        name: category
+        required: true
+        schema:
+          $ref: '#/components/schemas/category'
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/categoryFull'
+          description: Ok
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+        "404":
+          description: Not found
+          headers:
+            Access-Control-Allow-Origin:
+              $ref: '#/components/headers/corsOrigin'
+            Access-Control-Allow-Methods:
+              $ref: '#/components/headers/corsMethods'
+            Access-Control-Allow-Headers:
+              $ref: '#/components/headers/corsHeaders'
+      summary: Get category.
 components:
   headers:
     corsOrigin:
@@ -306,6 +343,15 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/id'
+      style: simple
+    category:
+      description: Category path.
+      explode: false
+      in: path
+      name: category
+      required: true
+      schema:
+        $ref: '#/components/schemas/category'
       style: simple
     regionCode:
       description: Region code.
@@ -1319,7 +1365,9 @@ components:
         - null
         - null
         alternatives:
-        - alternatives:
+        - category_label: category_label
+          category_id: category_id
+          alternatives:
           - badges:
             - bcorp
             - bcorp
@@ -1364,8 +1412,9 @@ components:
             description:
               text: text
               source: null
-          category: category
-        - alternatives:
+        - category_label: category_label
+          category_id: category_id
+          alternatives:
           - badges:
             - bcorp
             - bcorp
@@ -1410,7 +1459,6 @@ components:
             description:
               text: text
               source: null
-          category: category
         media:
         - mentions:
           - link: link
@@ -1537,6 +1585,8 @@ components:
     categoryAlternatives:
       description: List of product alternative in the given category.
       example:
+        category_label: category_label
+        category_id: category_id
         alternatives:
         - badges:
           - bcorp
@@ -1582,9 +1632,10 @@ components:
           description:
             text: text
             source: null
-        category: category
       properties:
-        category:
+        category_id:
+          type: string
+        category_label:
           type: string
         alternatives:
           items:
@@ -1592,7 +1643,8 @@ components:
           type: array
       required:
       - alternatives
-      - category
+      - category_id
+      - category_label
       type: object
     shoppingEntry:
       description: Describes a link to a shop
@@ -1620,4 +1672,114 @@ components:
       - fairphone
       - amazon
       type: string
+    category:
+      description: ID of a category.
+      type: string
+    categoryFull:
+      description: Full category data.
+      example:
+        supercategories:
+        - id: id
+          label: label
+        - id: id
+          label: label
+        label: label
+        subcategories:
+        - id: id
+          label: label
+        - id: id
+          label: label
+        status: exploratory
+        products:
+        - badges:
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
+          scores:
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
+          name: name
+          description:
+            text: text
+            source: null
+        - badges:
+          - bcorp
+          - bcorp
+          productIds:
+            gtins:
+            - null
+            - null
+            wiki:
+            - null
+            - null
+            eans:
+            - null
+            - null
+          scores:
+          - score: 0
+            scorerName: fti
+          - score: 0
+            scorerName: fti
+          name: name
+          description:
+            text: text
+            source: null
+      properties:
+        label:
+          type: string
+        status:
+          $ref: '#/components/schemas/categoryStatus'
+        subcategories:
+          items:
+            $ref: '#/components/schemas/categoryShort'
+          type: array
+        supercategories:
+          items:
+            $ref: '#/components/schemas/categoryShort'
+          type: array
+        products:
+          items:
+            $ref: '#/components/schemas/productShort'
+          type: array
+      required:
+      - label
+      - products
+      - status
+      - subcategories
+      - supercategories
+      type: object
+    categoryStatus:
+      description: Enumerates organisation ID variants.
+      enum:
+      - exploratory
+      - incomplete
+      - satisfactory
+      - complete
+      - broad
+      type: string
+    categoryShort:
+      description: Short category data.
+      example:
+        id: id
+        label: label
+      properties:
+        id:
+          type: string
+        label:
+          type: string
+      required:
+      - id
+      - label
+      type: object
 

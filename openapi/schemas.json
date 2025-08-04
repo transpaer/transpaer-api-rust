@@ -102,6 +102,10 @@
         "id"
       ]
     },
+    "category": {
+      "description": "ID of a category.",
+      "type": "string"
+    },
     "accuracy": {
       "description": "Match accuracy.",
       "type": "number",
@@ -791,7 +795,10 @@
       "description": "List of product alternative in the given category.",
       "type": "object",
       "properties": {
-        "category": {
+        "category_id": {
+          "type": "string"
+        },
+        "category_label": {
           "type": "string"
         },
         "alternatives": {
@@ -802,8 +809,73 @@
         }
       },
       "required": [
-        "category",
+        "category_id",
+        "category_label",
         "alternatives"
+      ]
+    },
+    "categoryShort": {
+      "description": "Short category data.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ]
+    },
+    "categoryFull": {
+      "description": "Full category data.",
+      "type": "object",
+      "properties": {
+        "label": {
+          "type": "string"
+        },
+        "status": {
+          "$ref": "#/$defs/categoryStatus"
+        },
+        "subcategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/categoryShort"
+          }
+        },
+        "supercategories": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/categoryShort"
+          }
+        },
+        "products": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/productShort"
+          }
+        }
+      },
+      "required": [
+        "label",
+        "status",
+        "products",
+        "subcategories",
+        "supercategories"
+      ]
+    },
+    "categoryStatus": {
+      "description": "Enumerates organisation ID variants.",
+      "type": "string",
+      "enum": [
+        "exploratory",
+        "incomplete",
+        "satisfactory",
+        "complete",
+        "broad"
       ]
     },
     "textSearchLink": {

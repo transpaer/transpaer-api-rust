@@ -8,6 +8,7 @@ use sustainity_api::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, model
                       CheckHealthResponse,
                       GetLibraryResponse,
                       SearchByTextResponse,
+                      GetCategoryResponse,
                       GetLibraryItemResponse,
                       GetAlternativesResponse,
                       GetOrganisationResponse,
@@ -43,6 +44,7 @@ fn main() {
                 "CheckHealth",
                 "GetLibrary",
                 "SearchByText",
+                "GetCategory",
             ])
             .required(true)
             .index(1))
@@ -124,6 +126,12 @@ fn main() {
         Some("SearchByText") => {
             let result = rt.block_on(client.search_by_text(
                   "query_example".to_string()
+            ));
+            info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
+        },
+        Some("GetCategory") => {
+            let result = rt.block_on(client.get_category(
+                  "category_example".to_string()
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },

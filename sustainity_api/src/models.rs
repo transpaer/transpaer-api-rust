@@ -203,6 +203,51 @@ impl std::convert::TryFrom<String> for BadgeName {
         value.parse()
     }
 }
+#[doc = "ID of a category."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"ID of a category.\","]
+#[doc = "  \"type\": \"string\""]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub struct Category(pub String);
+impl std::ops::Deref for Category {
+    type Target = String;
+    fn deref(&self) -> &String {
+        &self.0
+    }
+}
+impl From<Category> for String {
+    fn from(value: Category) -> Self {
+        value.0
+    }
+}
+impl From<&Category> for Category {
+    fn from(value: &Category) -> Self {
+        value.clone()
+    }
+}
+impl From<String> for Category {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+impl std::str::FromStr for Category {
+    type Err = std::convert::Infallible;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        Ok(Self(value.to_string()))
+    }
+}
+impl ToString for Category {
+    fn to_string(&self) -> String {
+        self.0.to_string()
+    }
+}
 #[doc = "List of product alternative in the given category."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -213,7 +258,8 @@ impl std::convert::TryFrom<String> for BadgeName {
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
 #[doc = "    \"alternatives\","]
-#[doc = "    \"category\""]
+#[doc = "    \"category_id\","]
+#[doc = "    \"category_label\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
 #[doc = "    \"alternatives\": {"]
@@ -222,7 +268,10 @@ impl std::convert::TryFrom<String> for BadgeName {
 #[doc = "        \"$ref\": \"#/$defs/productShort\""]
 #[doc = "      }"]
 #[doc = "    },"]
-#[doc = "    \"category\": {"]
+#[doc = "    \"category_id\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"category_label\": {"]
 #[doc = "      \"type\": \"string\""]
 #[doc = "    }"]
 #[doc = "  }"]
@@ -232,7 +281,8 @@ impl std::convert::TryFrom<String> for BadgeName {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct CategoryAlternatives {
     pub alternatives: Vec<ProductShort>,
-    pub category: String,
+    pub category_id: String,
+    pub category_label: String,
 }
 impl From<&CategoryAlternatives> for CategoryAlternatives {
     fn from(value: &CategoryAlternatives) -> Self {
@@ -242,6 +292,184 @@ impl From<&CategoryAlternatives> for CategoryAlternatives {
 impl CategoryAlternatives {
     pub fn builder() -> builder::CategoryAlternatives {
         Default::default()
+    }
+}
+#[doc = "Full category data."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Full category data.\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"label\","]
+#[doc = "    \"products\","]
+#[doc = "    \"status\","]
+#[doc = "    \"subcategories\","]
+#[doc = "    \"supercategories\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"label\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"products\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/productShort\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"status\": {"]
+#[doc = "      \"$ref\": \"#/$defs/categoryStatus\""]
+#[doc = "    },"]
+#[doc = "    \"subcategories\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/categoryShort\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"supercategories\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/categoryShort\""]
+#[doc = "      }"]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct CategoryFull {
+    pub label: String,
+    pub products: Vec<ProductShort>,
+    pub status: CategoryStatus,
+    pub subcategories: Vec<CategoryShort>,
+    pub supercategories: Vec<CategoryShort>,
+}
+impl From<&CategoryFull> for CategoryFull {
+    fn from(value: &CategoryFull) -> Self {
+        value.clone()
+    }
+}
+impl CategoryFull {
+    pub fn builder() -> builder::CategoryFull {
+        Default::default()
+    }
+}
+#[doc = "Short category data."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Short category data.\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"id\","]
+#[doc = "    \"label\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"id\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    },"]
+#[doc = "    \"label\": {"]
+#[doc = "      \"type\": \"string\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct CategoryShort {
+    pub id: String,
+    pub label: String,
+}
+impl From<&CategoryShort> for CategoryShort {
+    fn from(value: &CategoryShort) -> Self {
+        value.clone()
+    }
+}
+impl CategoryShort {
+    pub fn builder() -> builder::CategoryShort {
+        Default::default()
+    }
+}
+#[doc = "Enumerates organisation ID variants."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Enumerates organisation ID variants.\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"exploratory\","]
+#[doc = "    \"incomplete\","]
+#[doc = "    \"satisfactory\","]
+#[doc = "    \"complete\","]
+#[doc = "    \"broad\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum CategoryStatus {
+    #[serde(rename = "exploratory")]
+    Exploratory,
+    #[serde(rename = "incomplete")]
+    Incomplete,
+    #[serde(rename = "satisfactory")]
+    Satisfactory,
+    #[serde(rename = "complete")]
+    Complete,
+    #[serde(rename = "broad")]
+    Broad,
+}
+impl From<&CategoryStatus> for CategoryStatus {
+    fn from(value: &CategoryStatus) -> Self {
+        value.clone()
+    }
+}
+impl ToString for CategoryStatus {
+    fn to_string(&self) -> String {
+        match *self {
+            Self::Exploratory => "exploratory".to_string(),
+            Self::Incomplete => "incomplete".to_string(),
+            Self::Satisfactory => "satisfactory".to_string(),
+            Self::Complete => "complete".to_string(),
+            Self::Broad => "broad".to_string(),
+        }
+    }
+}
+impl std::str::FromStr for CategoryStatus {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
+        match value {
+            "exploratory" => Ok(Self::Exploratory),
+            "incomplete" => Ok(Self::Incomplete),
+            "satisfactory" => Ok(Self::Satisfactory),
+            "complete" => Ok(Self::Complete),
+            "broad" => Ok(Self::Broad),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl std::convert::TryFrom<&str> for CategoryStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<&String> for CategoryStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<String> for CategoryStatus {
+    type Error = self::error::ConversionError;
+    fn try_from(value: String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "Describes where the related data was retrieved from."]
@@ -2698,13 +2926,15 @@ pub mod builder {
     #[derive(Clone, Debug)]
     pub struct CategoryAlternatives {
         alternatives: Result<Vec<super::ProductShort>, String>,
-        category: Result<String, String>,
+        category_id: Result<String, String>,
+        category_label: Result<String, String>,
     }
     impl Default for CategoryAlternatives {
         fn default() -> Self {
             Self {
                 alternatives: Err("no value supplied for alternatives".to_string()),
-                category: Err("no value supplied for category".to_string()),
+                category_id: Err("no value supplied for category_id".to_string()),
+                category_label: Err("no value supplied for category_label".to_string()),
             }
         }
     }
@@ -2719,14 +2949,24 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for alternatives: {}", e));
             self
         }
-        pub fn category<T>(mut self, value: T) -> Self
+        pub fn category_id<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<String>,
             T::Error: std::fmt::Display,
         {
-            self.category = value
+            self.category_id = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for category: {}", e));
+                .map_err(|e| format!("error converting supplied value for category_id: {}", e));
+            self
+        }
+        pub fn category_label<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.category_label = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for category_label: {}", e));
             self
         }
     }
@@ -2735,7 +2975,8 @@ pub mod builder {
         fn try_from(value: CategoryAlternatives) -> Result<Self, super::error::ConversionError> {
             Ok(Self {
                 alternatives: value.alternatives?,
-                category: value.category?,
+                category_id: value.category_id?,
+                category_label: value.category_label?,
             })
         }
     }
@@ -2743,7 +2984,154 @@ pub mod builder {
         fn from(value: super::CategoryAlternatives) -> Self {
             Self {
                 alternatives: Ok(value.alternatives),
-                category: Ok(value.category),
+                category_id: Ok(value.category_id),
+                category_label: Ok(value.category_label),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct CategoryFull {
+        label: Result<String, String>,
+        products: Result<Vec<super::ProductShort>, String>,
+        status: Result<super::CategoryStatus, String>,
+        subcategories: Result<Vec<super::CategoryShort>, String>,
+        supercategories: Result<Vec<super::CategoryShort>, String>,
+    }
+    impl Default for CategoryFull {
+        fn default() -> Self {
+            Self {
+                label: Err("no value supplied for label".to_string()),
+                products: Err("no value supplied for products".to_string()),
+                status: Err("no value supplied for status".to_string()),
+                subcategories: Err("no value supplied for subcategories".to_string()),
+                supercategories: Err("no value supplied for supercategories".to_string()),
+            }
+        }
+    }
+    impl CategoryFull {
+        pub fn label<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.label = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for label: {}", e));
+            self
+        }
+        pub fn products<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::ProductShort>>,
+            T::Error: std::fmt::Display,
+        {
+            self.products = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for products: {}", e));
+            self
+        }
+        pub fn status<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::CategoryStatus>,
+            T::Error: std::fmt::Display,
+        {
+            self.status = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for status: {}", e));
+            self
+        }
+        pub fn subcategories<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::CategoryShort>>,
+            T::Error: std::fmt::Display,
+        {
+            self.subcategories = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for subcategories: {}", e));
+            self
+        }
+        pub fn supercategories<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::CategoryShort>>,
+            T::Error: std::fmt::Display,
+        {
+            self.supercategories = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for supercategories: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<CategoryFull> for super::CategoryFull {
+        type Error = super::error::ConversionError;
+        fn try_from(value: CategoryFull) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                label: value.label?,
+                products: value.products?,
+                status: value.status?,
+                subcategories: value.subcategories?,
+                supercategories: value.supercategories?,
+            })
+        }
+    }
+    impl From<super::CategoryFull> for CategoryFull {
+        fn from(value: super::CategoryFull) -> Self {
+            Self {
+                label: Ok(value.label),
+                products: Ok(value.products),
+                status: Ok(value.status),
+                subcategories: Ok(value.subcategories),
+                supercategories: Ok(value.supercategories),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct CategoryShort {
+        id: Result<String, String>,
+        label: Result<String, String>,
+    }
+    impl Default for CategoryShort {
+        fn default() -> Self {
+            Self {
+                id: Err("no value supplied for id".to_string()),
+                label: Err("no value supplied for label".to_string()),
+            }
+        }
+    }
+    impl CategoryShort {
+        pub fn id<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.id = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for id: {}", e));
+            self
+        }
+        pub fn label<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<String>,
+            T::Error: std::fmt::Display,
+        {
+            self.label = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for label: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<CategoryShort> for super::CategoryShort {
+        type Error = super::error::ConversionError;
+        fn try_from(value: CategoryShort) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                id: value.id?,
+                label: value.label?,
+            })
+        }
+    }
+    impl From<super::CategoryShort> for CategoryShort {
+        fn from(value: super::CategoryShort) -> Self {
+            Self {
+                id: Ok(value.id),
+                label: Ok(value.label),
             }
         }
     }
