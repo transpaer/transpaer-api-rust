@@ -1,4 +1,4 @@
-# SustainityScoreCategory
+# TranspaerScoreCategory
 
 ## Properties
 Name | Type | Description | Notes

@@ -1,13 +1,13 @@
 #!/bin/bash
 
-rm -rf sustainity_api
+rm -rf transpaer_api
 
-openapi-generator validate -i openapi/sustainity.json
+openapi-generator validate -i openapi/transpaer.json
 
 openapi-generator generate \
-     -i openapi/sustainity.json \
-     -o sustainity_api \
-     --additional-properties packageName=sustainity-api,packageVersion=0.3.0 \
+     -i openapi/transpaer.json \
+     -o transpaer_api \
+     --additional-properties packageName=transpaer-api,packageVersion=0.3.0 \
      -g rust-server
 
-cargo typify openapi/schemas.json -a PartialEq -o sustainity_api/src/models.rs
+cargo typify openapi/schemas.json -a PartialEq -o transpaer_api/src/models.rs

@@ -1,4 +1,4 @@
-//! Main binary entry point for sustainity_api implementation.
+//! Main binary entry point for transpaer_api implementation.
 // This is the amended version that adds Authorization via Inversion of Control.
 
 #![allow(missing_docs)]

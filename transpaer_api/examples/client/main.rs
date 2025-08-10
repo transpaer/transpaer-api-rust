@@ -4,7 +4,7 @@
 #[allow(unused_imports)]
 use futures::{future, Stream, stream};
 #[allow(unused_imports)]
-use sustainity_api::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, models,
+use transpaer_api::{Api, ApiNoContext, Claims, Client, ContextWrapperExt, models,
                       CheckHealthResponse,
                       GetLibraryResponse,
                       SearchByTextResponse,

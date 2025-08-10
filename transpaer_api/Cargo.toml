@@ -1,8 +1,8 @@
 [package]
-name = "sustainity-api"
+name = "transpaer-api"
 version = "0.3.0"
 authors = ["OpenAPI Generator team and contributors"]
-description = "API for the sustaininty backend "
+description = "API for the transpaer backend "
 # Override this license by providing a License Object in the OpenAPI.
 license = "Unlicense"
 edition = "2018"
@@ -91,6 +91,6 @@ name = "server"
 required-features = ["server"]
 
 [[bin]]
-name = "sustainity-api"
+name = "transpaer-api"
 path = "bin/cli.rs"
 required-features = ["client", "cli"]

@@ -1,4 +1,4 @@
-use sustainity_api::Claims;
+use transpaer_api::Claims;
 use jsonwebtoken::{encode, errors::Error as JwtError, Algorithm, EncodingKey, Header};
 use log::debug;
 
