@@ -1,9 +1,9 @@
 openapi: 3.0.0
 info:
   description: |
-    API for the sustaininty backend
-  title: Sustainity
-  version: 0.4.0
+    API for the transpaer backend
+  title: Transpaer
+  version: 0.1.0
 servers:
 - url: /
 paths:
@@ -633,15 +633,15 @@ components:
           source: null
         names:
         - text: text
-          source: sustainity
+          source: transpaer
         - text: text
-          source: sustainity
+          source: transpaer
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
           tco:
             brandName: brandName
-          sustainity:
+          transpaer:
             score:
               total: 5.962133916683182
               tree:
@@ -667,7 +667,7 @@ components:
             matchAccuracy: 0.6027456183070403
           tco:
             brandName: brandName
-          sustainity:
+          transpaer:
             score:
               total: 5.962133916683182
               tree:
@@ -842,7 +842,7 @@ components:
       description: Short text with its source.
       example:
         text: text
-        source: sustainity
+        source: transpaer
       properties:
         text:
           description: "Short string for labels, titles, summaries..."
@@ -857,7 +857,7 @@ components:
     dataSource:
       description: Describes where the related data was retrieved from.
       enum:
-      - sustainity
+      - transpaer
       - wiki
       - "off"
       - eu
@@ -1040,7 +1040,7 @@ components:
           matchAccuracy: 0.6027456183070403
         tco:
           brandName: brandName
-        sustainity:
+        transpaer:
           score:
             total: 5.962133916683182
             tree:
@@ -1071,8 +1071,8 @@ components:
           $ref: '#/components/schemas/euEcolabelMedallion'
         fti:
           $ref: '#/components/schemas/ftiMedallion'
-        sustainity:
-          $ref: '#/components/schemas/sustainityMedallion'
+        transpaer:
+          $ref: '#/components/schemas/transpaerMedallion'
         tco:
           $ref: '#/components/schemas/tcoMedallion'
       required:
@@ -1084,7 +1084,7 @@ components:
       - bCorp
       - euEcolabel
       - fti
-      - sustainity
+      - transpaer
       - tco
       type: string
     bCorpMedallion:
@@ -1134,8 +1134,8 @@ components:
       required:
       - score
       type: object
-    sustainityMedallion:
-      description: Details of Sustainity evaluation.
+    transpaerMedallion:
+      description: Details of Transpaer evaluation.
       example:
         score:
           total: 5.962133916683182
@@ -1154,12 +1154,12 @@ components:
             - null
       properties:
         score:
-          $ref: '#/components/schemas/sustainityScore'
+          $ref: '#/components/schemas/transpaerScore'
       required:
       - score
       type: object
-    sustainityScore:
-      description: Explanation of calculation of the Sustainity score.
+    transpaerScore:
+      description: Explanation of calculation of the Transpaer score.
       example:
         total: 5.962133916683182
         tree:
@@ -1181,14 +1181,14 @@ components:
           type: number
         tree:
           items:
-            $ref: '#/components/schemas/sustainityScoreBranch'
+            $ref: '#/components/schemas/transpaerScoreBranch'
           type: array
       required:
       - total
       - tree
       type: object
-    sustainityScoreBranch:
-      description: Part of explanation of calculation of the Sustainity score.
+    transpaerScoreBranch:
+      description: Part of explanation of calculation of the Transpaer score.
       example:
         score: 2.3021358869347655
         weight: 5
@@ -1198,7 +1198,7 @@ components:
         - null
       properties:
         category:
-          $ref: '#/components/schemas/sustainityScoreCategory'
+          $ref: '#/components/schemas/transpaerScoreCategory'
         weight:
           type: integer
         score:
@@ -1206,7 +1206,7 @@ components:
           type: number
         branches:
           items:
-            $ref: '#/components/schemas/sustainityScoreBranch'
+            $ref: '#/components/schemas/transpaerScoreBranch'
           type: array
       required:
       - branches
@@ -1214,8 +1214,8 @@ components:
       - score
       - weight
       type: object
-    sustainityScoreCategory:
-      description: Categories in the sustainity score
+    transpaerScoreCategory:
+      description: Categories in the transpaer score
       enum:
       - dataAvailability
       - producerKnown
@@ -1250,9 +1250,9 @@ components:
           source: null
         names:
         - text: text
-          source: sustainity
+          source: transpaer
         - text: text
-          source: sustainity
+          source: transpaer
         manufacturers:
         - badges:
           - bcorp
@@ -1313,7 +1313,7 @@ components:
             matchAccuracy: 0.6027456183070403
           tco:
             brandName: brandName
-          sustainity:
+          transpaer:
             score:
               total: 5.962133916683182
               tree:
@@ -1339,7 +1339,7 @@ components:
             matchAccuracy: 0.6027456183070403
           tco:
             brandName: brandName
-          sustainity:
+          transpaer:
             score:
               total: 5.962133916683182
               tree:

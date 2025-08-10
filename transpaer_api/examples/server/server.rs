@@ -1,4 +1,4 @@
-//! Main library entry point for sustainity_api implementation.
+//! Main library entry point for transpaer_api implementation.
 
 #![allow(unused_imports)]
 
@@ -20,7 +20,7 @@ use tokio::net::TcpListener;
 #[cfg(not(any(target_os = "macos", target_os = "windows", target_os = "ios")))]
 use openssl::ssl::{Ssl, SslAcceptor, SslAcceptorBuilder, SslFiletype, SslMethod};
 
-use sustainity_api::models;
+use transpaer_api::models;
 
 /// Builds an SSL implementation for Simple HTTPS from some hard-coded file names
 pub async fn create(addr: &str, https: bool) {
@@ -34,7 +34,7 @@ pub async fn create(addr: &str, https: bool) {
 
     #[allow(unused_mut)]
     let mut service =
-        sustainity_api::server::context::MakeAddContext::<_, EmptyContext>::new(
+        transpaer_api::server::context::MakeAddContext::<_, EmptyContext>::new(
             service
         );
 
@@ -100,7 +100,7 @@ use swagger::auth::Authorization;
 use crate::server_auth;
 
 
-use sustainity_api::{
+use transpaer_api::{
     Api,
     CheckHealthResponse,
     GetLibraryResponse,
@@ -111,7 +111,7 @@ use sustainity_api::{
     GetOrganisationResponse,
     GetProductResponse,
 };
-use sustainity_api::server::MakeService;
+use transpaer_api::server::MakeService;
 use std::error::Error;
 use swagger::ApiError;
 

@@ -3,7 +3,7 @@ use swagger::{
     auth::{Basic, Bearer},
     Has,
     XSpanIdString};
-use sustainity_api::{AuthenticationApi, Claims};
+use transpaer_api::{AuthenticationApi, Claims};
 use crate::server::Server;
 use jsonwebtoken::{decode, errors as JwtError, decode_header, DecodingKey, TokenData, Validation};
 use swagger::auth::Authorization;

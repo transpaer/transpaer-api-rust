@@ -3,7 +3,7 @@ use anyhow::{anyhow, Context, Result};
 use log::{debug, info};
 // models may be unused if all inputs are primitive types
 #[allow(unused_imports)]
-use sustainity_api::{
+use transpaer_api::{
     models, ApiNoContext, Client, ContextWrapperExt,
     CheckHealthResponse,
     GetLibraryResponse,
@@ -27,9 +27,9 @@ type ClientContext = swagger::make_context_ty!(
 
 #[derive(StructOpt, Debug)]
 #[structopt(
-    name = "Sustainity",
-    version = "0.4.0",
-    about = "CLI access to Sustainity"
+    name = "Transpaer",
+    version = "0.1.0",
+    about = "CLI access to Transpaer"
 )]
 struct Cli {
     #[structopt(subcommand)]

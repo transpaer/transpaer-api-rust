@@ -481,7 +481,7 @@ impl std::convert::TryFrom<String> for CategoryStatus {
 #[doc = "  \"description\": \"Describes where the related data was retrieved from.\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"sustainity\","]
+#[doc = "    \"transpaer\","]
 #[doc = "    \"wiki\","]
 #[doc = "    \"off\","]
 #[doc = "    \"eu\","]
@@ -495,8 +495,8 @@ impl std::convert::TryFrom<String> for CategoryStatus {
 #[doc = r" </details>"]
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum DataSource {
-    #[serde(rename = "sustainity")]
-    Sustainity,
+    #[serde(rename = "transpaer")]
+    Transpaer,
     #[serde(rename = "wiki")]
     Wiki,
     #[serde(rename = "off")]
@@ -520,7 +520,7 @@ impl From<&DataSource> for DataSource {
 impl ToString for DataSource {
     fn to_string(&self) -> String {
         match *self {
-            Self::Sustainity => "sustainity".to_string(),
+            Self::Transpaer => "transpaer".to_string(),
             Self::Wiki => "wiki".to_string(),
             Self::Off => "off".to_string(),
             Self::Eu => "eu".to_string(),
@@ -535,7 +535,7 @@ impl std::str::FromStr for DataSource {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
         match value {
-            "sustainity" => Ok(Self::Sustainity),
+            "transpaer" => Ok(Self::Transpaer),
             "wiki" => Ok(Self::Wiki),
             "off" => Ok(Self::Off),
             "eu" => Ok(Self::Eu),
@@ -1117,11 +1117,11 @@ impl LongText {
 #[doc = "    \"fti\": {"]
 #[doc = "      \"$ref\": \"#/$defs/ftiMedallion\""]
 #[doc = "    },"]
-#[doc = "    \"sustainity\": {"]
-#[doc = "      \"$ref\": \"#/$defs/sustainityMedallion\""]
-#[doc = "    },"]
 #[doc = "    \"tco\": {"]
 #[doc = "      \"$ref\": \"#/$defs/tcoMedallion\""]
+#[doc = "    },"]
+#[doc = "    \"transpaer\": {"]
+#[doc = "      \"$ref\": \"#/$defs/transpaerMedallion\""]
 #[doc = "    },"]
 #[doc = "    \"variant\": {"]
 #[doc = "      \"$ref\": \"#/$defs/medallionVariant\""]
@@ -1143,9 +1143,9 @@ pub struct Medallion {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub fti: Option<FtiMedallion>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub sustainity: Option<SustainityMedallion>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub tco: Option<TcoMedallion>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub transpaer: Option<TranspaerMedallion>,
     pub variant: MedallionVariant,
 }
 impl From<&Medallion> for Medallion {
@@ -1170,7 +1170,7 @@ impl Medallion {
 #[doc = "    \"bCorp\","]
 #[doc = "    \"euEcolabel\","]
 #[doc = "    \"fti\","]
-#[doc = "    \"sustainity\","]
+#[doc = "    \"transpaer\","]
 #[doc = "    \"tco\""]
 #[doc = "  ]"]
 #[doc = "}"]
@@ -1184,8 +1184,8 @@ pub enum MedallionVariant {
     EuEcolabel,
     #[serde(rename = "fti")]
     Fti,
-    #[serde(rename = "sustainity")]
-    Sustainity,
+    #[serde(rename = "transpaer")]
+    Transpaer,
     #[serde(rename = "tco")]
     Tco,
 }
@@ -1200,7 +1200,7 @@ impl ToString for MedallionVariant {
             Self::BCorp => "bCorp".to_string(),
             Self::EuEcolabel => "euEcolabel".to_string(),
             Self::Fti => "fti".to_string(),
-            Self::Sustainity => "sustainity".to_string(),
+            Self::Transpaer => "transpaer".to_string(),
             Self::Tco => "tco".to_string(),
         }
     }
@@ -1212,7 +1212,7 @@ impl std::str::FromStr for MedallionVariant {
             "bCorp" => Ok(Self::BCorp),
             "euEcolabel" => Ok(Self::EuEcolabel),
             "fti" => Ok(Self::Fti),
-            "sustainity" => Ok(Self::Sustainity),
+            "transpaer" => Ok(Self::Transpaer),
             "tco" => Ok(Self::Tco),
             _ => Err("invalid value".into()),
         }
@@ -2385,236 +2385,6 @@ impl ShortText {
         Default::default()
     }
 }
-#[doc = "Details of Sustainity evaluation."]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"description\": \"Details of Sustainity evaluation.\","]
-#[doc = "  \"type\": \"object\","]
-#[doc = "  \"required\": ["]
-#[doc = "    \"score\""]
-#[doc = "  ],"]
-#[doc = "  \"properties\": {"]
-#[doc = "    \"score\": {"]
-#[doc = "      \"$ref\": \"#/$defs/sustainityScore\""]
-#[doc = "    }"]
-#[doc = "  }"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct SustainityMedallion {
-    pub score: SustainityScore,
-}
-impl From<&SustainityMedallion> for SustainityMedallion {
-    fn from(value: &SustainityMedallion) -> Self {
-        value.clone()
-    }
-}
-impl SustainityMedallion {
-    pub fn builder() -> builder::SustainityMedallion {
-        Default::default()
-    }
-}
-#[doc = "Explanation of calculation of the Sustainity score."]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"description\": \"Explanation of calculation of the Sustainity score.\","]
-#[doc = "  \"type\": \"object\","]
-#[doc = "  \"required\": ["]
-#[doc = "    \"total\","]
-#[doc = "    \"tree\""]
-#[doc = "  ],"]
-#[doc = "  \"properties\": {"]
-#[doc = "    \"total\": {"]
-#[doc = "      \"type\": \"number\","]
-#[doc = "      \"format\": \"double\""]
-#[doc = "    },"]
-#[doc = "    \"tree\": {"]
-#[doc = "      \"type\": \"array\","]
-#[doc = "      \"items\": {"]
-#[doc = "        \"$ref\": \"#/$defs/sustainityScoreBranch\""]
-#[doc = "      }"]
-#[doc = "    }"]
-#[doc = "  }"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct SustainityScore {
-    pub total: f64,
-    pub tree: Vec<SustainityScoreBranch>,
-}
-impl From<&SustainityScore> for SustainityScore {
-    fn from(value: &SustainityScore) -> Self {
-        value.clone()
-    }
-}
-impl SustainityScore {
-    pub fn builder() -> builder::SustainityScore {
-        Default::default()
-    }
-}
-#[doc = "Part of explanation of calculation of the Sustainity score."]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"description\": \"Part of explanation of calculation of the Sustainity score.\","]
-#[doc = "  \"type\": \"object\","]
-#[doc = "  \"required\": ["]
-#[doc = "    \"branches\","]
-#[doc = "    \"category\","]
-#[doc = "    \"score\","]
-#[doc = "    \"weight\""]
-#[doc = "  ],"]
-#[doc = "  \"properties\": {"]
-#[doc = "    \"branches\": {"]
-#[doc = "      \"type\": \"array\","]
-#[doc = "      \"items\": {"]
-#[doc = "        \"$ref\": \"#/$defs/sustainityScoreBranch\""]
-#[doc = "      }"]
-#[doc = "    },"]
-#[doc = "    \"category\": {"]
-#[doc = "      \"$ref\": \"#/$defs/sustainityScoreCategory\""]
-#[doc = "    },"]
-#[doc = "    \"score\": {"]
-#[doc = "      \"type\": \"number\","]
-#[doc = "      \"format\": \"double\""]
-#[doc = "    },"]
-#[doc = "    \"weight\": {"]
-#[doc = "      \"type\": \"integer\""]
-#[doc = "    }"]
-#[doc = "  }"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct SustainityScoreBranch {
-    pub branches: Vec<SustainityScoreBranch>,
-    pub category: SustainityScoreCategory,
-    pub score: f64,
-    pub weight: i64,
-}
-impl From<&SustainityScoreBranch> for SustainityScoreBranch {
-    fn from(value: &SustainityScoreBranch) -> Self {
-        value.clone()
-    }
-}
-impl SustainityScoreBranch {
-    pub fn builder() -> builder::SustainityScoreBranch {
-        Default::default()
-    }
-}
-#[doc = "Categories in the sustainity score"]
-#[doc = r""]
-#[doc = r" <details><summary>JSON schema</summary>"]
-#[doc = r""]
-#[doc = r" ```json"]
-#[doc = "{"]
-#[doc = "  \"description\": \"Categories in the sustainity score\","]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
-#[doc = "    \"dataAvailability\","]
-#[doc = "    \"producerKnown\","]
-#[doc = "    \"productionPlaceKnown\","]
-#[doc = "    \"idKnown\","]
-#[doc = "    \"categoryAssigned\","]
-#[doc = "    \"category\","]
-#[doc = "    \"warrantyLength\","]
-#[doc = "    \"numCerts\","]
-#[doc = "    \"atLeastOneCert\","]
-#[doc = "    \"atLeastTwoCerts\""]
-#[doc = "  ]"]
-#[doc = "}"]
-#[doc = r" ```"]
-#[doc = r" </details>"]
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
-pub enum SustainityScoreCategory {
-    #[serde(rename = "dataAvailability")]
-    DataAvailability,
-    #[serde(rename = "producerKnown")]
-    ProducerKnown,
-    #[serde(rename = "productionPlaceKnown")]
-    ProductionPlaceKnown,
-    #[serde(rename = "idKnown")]
-    IdKnown,
-    #[serde(rename = "categoryAssigned")]
-    CategoryAssigned,
-    #[serde(rename = "category")]
-    Category,
-    #[serde(rename = "warrantyLength")]
-    WarrantyLength,
-    #[serde(rename = "numCerts")]
-    NumCerts,
-    #[serde(rename = "atLeastOneCert")]
-    AtLeastOneCert,
-    #[serde(rename = "atLeastTwoCerts")]
-    AtLeastTwoCerts,
-}
-impl From<&SustainityScoreCategory> for SustainityScoreCategory {
-    fn from(value: &SustainityScoreCategory) -> Self {
-        value.clone()
-    }
-}
-impl ToString for SustainityScoreCategory {
-    fn to_string(&self) -> String {
-        match *self {
-            Self::DataAvailability => "dataAvailability".to_string(),
-            Self::ProducerKnown => "producerKnown".to_string(),
-            Self::ProductionPlaceKnown => "productionPlaceKnown".to_string(),
-            Self::IdKnown => "idKnown".to_string(),
-            Self::CategoryAssigned => "categoryAssigned".to_string(),
-            Self::Category => "category".to_string(),
-            Self::WarrantyLength => "warrantyLength".to_string(),
-            Self::NumCerts => "numCerts".to_string(),
-            Self::AtLeastOneCert => "atLeastOneCert".to_string(),
-            Self::AtLeastTwoCerts => "atLeastTwoCerts".to_string(),
-        }
-    }
-}
-impl std::str::FromStr for SustainityScoreCategory {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
-        match value {
-            "dataAvailability" => Ok(Self::DataAvailability),
-            "producerKnown" => Ok(Self::ProducerKnown),
-            "productionPlaceKnown" => Ok(Self::ProductionPlaceKnown),
-            "idKnown" => Ok(Self::IdKnown),
-            "categoryAssigned" => Ok(Self::CategoryAssigned),
-            "category" => Ok(Self::Category),
-            "warrantyLength" => Ok(Self::WarrantyLength),
-            "numCerts" => Ok(Self::NumCerts),
-            "atLeastOneCert" => Ok(Self::AtLeastOneCert),
-            "atLeastTwoCerts" => Ok(Self::AtLeastTwoCerts),
-            _ => Err("invalid value".into()),
-        }
-    }
-}
-impl std::convert::TryFrom<&str> for SustainityScoreCategory {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl std::convert::TryFrom<&String> for SustainityScoreCategory {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &String) -> Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl std::convert::TryFrom<String> for SustainityScoreCategory {
-    type Error = self::error::ConversionError;
-    fn try_from(value: String) -> Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
 #[doc = "Details of TCO evaluation."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -2804,6 +2574,236 @@ impl From<&TextSearchResults> for TextSearchResults {
 impl TextSearchResults {
     pub fn builder() -> builder::TextSearchResults {
         Default::default()
+    }
+}
+#[doc = "Details of Transpaer evaluation."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Details of Transpaer evaluation.\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"score\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"score\": {"]
+#[doc = "      \"$ref\": \"#/$defs/transpaerScore\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TranspaerMedallion {
+    pub score: TranspaerScore,
+}
+impl From<&TranspaerMedallion> for TranspaerMedallion {
+    fn from(value: &TranspaerMedallion) -> Self {
+        value.clone()
+    }
+}
+impl TranspaerMedallion {
+    pub fn builder() -> builder::TranspaerMedallion {
+        Default::default()
+    }
+}
+#[doc = "Explanation of calculation of the Transpaer score."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Explanation of calculation of the Transpaer score.\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"total\","]
+#[doc = "    \"tree\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"total\": {"]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"format\": \"double\""]
+#[doc = "    },"]
+#[doc = "    \"tree\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/transpaerScoreBranch\""]
+#[doc = "      }"]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TranspaerScore {
+    pub total: f64,
+    pub tree: Vec<TranspaerScoreBranch>,
+}
+impl From<&TranspaerScore> for TranspaerScore {
+    fn from(value: &TranspaerScore) -> Self {
+        value.clone()
+    }
+}
+impl TranspaerScore {
+    pub fn builder() -> builder::TranspaerScore {
+        Default::default()
+    }
+}
+#[doc = "Part of explanation of calculation of the Transpaer score."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Part of explanation of calculation of the Transpaer score.\","]
+#[doc = "  \"type\": \"object\","]
+#[doc = "  \"required\": ["]
+#[doc = "    \"branches\","]
+#[doc = "    \"category\","]
+#[doc = "    \"score\","]
+#[doc = "    \"weight\""]
+#[doc = "  ],"]
+#[doc = "  \"properties\": {"]
+#[doc = "    \"branches\": {"]
+#[doc = "      \"type\": \"array\","]
+#[doc = "      \"items\": {"]
+#[doc = "        \"$ref\": \"#/$defs/transpaerScoreBranch\""]
+#[doc = "      }"]
+#[doc = "    },"]
+#[doc = "    \"category\": {"]
+#[doc = "      \"$ref\": \"#/$defs/transpaerScoreCategory\""]
+#[doc = "    },"]
+#[doc = "    \"score\": {"]
+#[doc = "      \"type\": \"number\","]
+#[doc = "      \"format\": \"double\""]
+#[doc = "    },"]
+#[doc = "    \"weight\": {"]
+#[doc = "      \"type\": \"integer\""]
+#[doc = "    }"]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct TranspaerScoreBranch {
+    pub branches: Vec<TranspaerScoreBranch>,
+    pub category: TranspaerScoreCategory,
+    pub score: f64,
+    pub weight: i64,
+}
+impl From<&TranspaerScoreBranch> for TranspaerScoreBranch {
+    fn from(value: &TranspaerScoreBranch) -> Self {
+        value.clone()
+    }
+}
+impl TranspaerScoreBranch {
+    pub fn builder() -> builder::TranspaerScoreBranch {
+        Default::default()
+    }
+}
+#[doc = "Categories in the transpaer score"]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Categories in the transpaer score\","]
+#[doc = "  \"type\": \"string\","]
+#[doc = "  \"enum\": ["]
+#[doc = "    \"dataAvailability\","]
+#[doc = "    \"producerKnown\","]
+#[doc = "    \"productionPlaceKnown\","]
+#[doc = "    \"idKnown\","]
+#[doc = "    \"categoryAssigned\","]
+#[doc = "    \"category\","]
+#[doc = "    \"warrantyLength\","]
+#[doc = "    \"numCerts\","]
+#[doc = "    \"atLeastOneCert\","]
+#[doc = "    \"atLeastTwoCerts\""]
+#[doc = "  ]"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
+pub enum TranspaerScoreCategory {
+    #[serde(rename = "dataAvailability")]
+    DataAvailability,
+    #[serde(rename = "producerKnown")]
+    ProducerKnown,
+    #[serde(rename = "productionPlaceKnown")]
+    ProductionPlaceKnown,
+    #[serde(rename = "idKnown")]
+    IdKnown,
+    #[serde(rename = "categoryAssigned")]
+    CategoryAssigned,
+    #[serde(rename = "category")]
+    Category,
+    #[serde(rename = "warrantyLength")]
+    WarrantyLength,
+    #[serde(rename = "numCerts")]
+    NumCerts,
+    #[serde(rename = "atLeastOneCert")]
+    AtLeastOneCert,
+    #[serde(rename = "atLeastTwoCerts")]
+    AtLeastTwoCerts,
+}
+impl From<&TranspaerScoreCategory> for TranspaerScoreCategory {
+    fn from(value: &TranspaerScoreCategory) -> Self {
+        value.clone()
+    }
+}
+impl ToString for TranspaerScoreCategory {
+    fn to_string(&self) -> String {
+        match *self {
+            Self::DataAvailability => "dataAvailability".to_string(),
+            Self::ProducerKnown => "producerKnown".to_string(),
+            Self::ProductionPlaceKnown => "productionPlaceKnown".to_string(),
+            Self::IdKnown => "idKnown".to_string(),
+            Self::CategoryAssigned => "categoryAssigned".to_string(),
+            Self::Category => "category".to_string(),
+            Self::WarrantyLength => "warrantyLength".to_string(),
+            Self::NumCerts => "numCerts".to_string(),
+            Self::AtLeastOneCert => "atLeastOneCert".to_string(),
+            Self::AtLeastTwoCerts => "atLeastTwoCerts".to_string(),
+        }
+    }
+}
+impl std::str::FromStr for TranspaerScoreCategory {
+    type Err = self::error::ConversionError;
+    fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
+        match value {
+            "dataAvailability" => Ok(Self::DataAvailability),
+            "producerKnown" => Ok(Self::ProducerKnown),
+            "productionPlaceKnown" => Ok(Self::ProductionPlaceKnown),
+            "idKnown" => Ok(Self::IdKnown),
+            "categoryAssigned" => Ok(Self::CategoryAssigned),
+            "category" => Ok(Self::Category),
+            "warrantyLength" => Ok(Self::WarrantyLength),
+            "numCerts" => Ok(Self::NumCerts),
+            "atLeastOneCert" => Ok(Self::AtLeastOneCert),
+            "atLeastTwoCerts" => Ok(Self::AtLeastTwoCerts),
+            _ => Err("invalid value".into()),
+        }
+    }
+}
+impl std::convert::TryFrom<&str> for TranspaerScoreCategory {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &str) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<&String> for TranspaerScoreCategory {
+    type Error = self::error::ConversionError;
+    fn try_from(value: &String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
+    }
+}
+impl std::convert::TryFrom<String> for TranspaerScoreCategory {
+    type Error = self::error::ConversionError;
+    fn try_from(value: String) -> Result<Self, self::error::ConversionError> {
+        value.parse()
     }
 }
 #[doc = "Enumerates verified shops."]
@@ -3532,8 +3532,8 @@ pub mod builder {
         bcorp: Result<Option<super::BCorpMedallion>, String>,
         eu_ecolabel: Result<Option<super::EuEcolabelMedallion>, String>,
         fti: Result<Option<super::FtiMedallion>, String>,
-        sustainity: Result<Option<super::SustainityMedallion>, String>,
         tco: Result<Option<super::TcoMedallion>, String>,
+        transpaer: Result<Option<super::TranspaerMedallion>, String>,
         variant: Result<super::MedallionVariant, String>,
     }
     impl Default for Medallion {
@@ -3542,8 +3542,8 @@ pub mod builder {
                 bcorp: Ok(Default::default()),
                 eu_ecolabel: Ok(Default::default()),
                 fti: Ok(Default::default()),
-                sustainity: Ok(Default::default()),
                 tco: Ok(Default::default()),
+                transpaer: Ok(Default::default()),
                 variant: Err("no value supplied for variant".to_string()),
             }
         }
@@ -3579,16 +3579,6 @@ pub mod builder {
                 .map_err(|e| format!("error converting supplied value for fti: {}", e));
             self
         }
-        pub fn sustainity<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<Option<super::SustainityMedallion>>,
-            T::Error: std::fmt::Display,
-        {
-            self.sustainity = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for sustainity: {}", e));
-            self
-        }
         pub fn tco<T>(mut self, value: T) -> Self
         where
             T: std::convert::TryInto<Option<super::TcoMedallion>>,
@@ -3597,6 +3587,16 @@ pub mod builder {
             self.tco = value
                 .try_into()
                 .map_err(|e| format!("error converting supplied value for tco: {}", e));
+            self
+        }
+        pub fn transpaer<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Option<super::TranspaerMedallion>>,
+            T::Error: std::fmt::Display,
+        {
+            self.transpaer = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for transpaer: {}", e));
             self
         }
         pub fn variant<T>(mut self, value: T) -> Self
@@ -3617,8 +3617,8 @@ pub mod builder {
                 bcorp: value.bcorp?,
                 eu_ecolabel: value.eu_ecolabel?,
                 fti: value.fti?,
-                sustainity: value.sustainity?,
                 tco: value.tco?,
+                transpaer: value.transpaer?,
                 variant: value.variant?,
             })
         }
@@ -3629,8 +3629,8 @@ pub mod builder {
                 bcorp: Ok(value.bcorp),
                 eu_ecolabel: Ok(value.eu_ecolabel),
                 fti: Ok(value.fti),
-                sustainity: Ok(value.sustainity),
                 tco: Ok(value.tco),
+                transpaer: Ok(value.transpaer),
                 variant: Ok(value.variant),
             }
         }
@@ -4816,176 +4816,6 @@ pub mod builder {
         }
     }
     #[derive(Clone, Debug)]
-    pub struct SustainityMedallion {
-        score: Result<super::SustainityScore, String>,
-    }
-    impl Default for SustainityMedallion {
-        fn default() -> Self {
-            Self {
-                score: Err("no value supplied for score".to_string()),
-            }
-        }
-    }
-    impl SustainityMedallion {
-        pub fn score<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<super::SustainityScore>,
-            T::Error: std::fmt::Display,
-        {
-            self.score = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for score: {}", e));
-            self
-        }
-    }
-    impl std::convert::TryFrom<SustainityMedallion> for super::SustainityMedallion {
-        type Error = super::error::ConversionError;
-        fn try_from(value: SustainityMedallion) -> Result<Self, super::error::ConversionError> {
-            Ok(Self {
-                score: value.score?,
-            })
-        }
-    }
-    impl From<super::SustainityMedallion> for SustainityMedallion {
-        fn from(value: super::SustainityMedallion) -> Self {
-            Self {
-                score: Ok(value.score),
-            }
-        }
-    }
-    #[derive(Clone, Debug)]
-    pub struct SustainityScore {
-        total: Result<f64, String>,
-        tree: Result<Vec<super::SustainityScoreBranch>, String>,
-    }
-    impl Default for SustainityScore {
-        fn default() -> Self {
-            Self {
-                total: Err("no value supplied for total".to_string()),
-                tree: Err("no value supplied for tree".to_string()),
-            }
-        }
-    }
-    impl SustainityScore {
-        pub fn total<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<f64>,
-            T::Error: std::fmt::Display,
-        {
-            self.total = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for total: {}", e));
-            self
-        }
-        pub fn tree<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<Vec<super::SustainityScoreBranch>>,
-            T::Error: std::fmt::Display,
-        {
-            self.tree = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for tree: {}", e));
-            self
-        }
-    }
-    impl std::convert::TryFrom<SustainityScore> for super::SustainityScore {
-        type Error = super::error::ConversionError;
-        fn try_from(value: SustainityScore) -> Result<Self, super::error::ConversionError> {
-            Ok(Self {
-                total: value.total?,
-                tree: value.tree?,
-            })
-        }
-    }
-    impl From<super::SustainityScore> for SustainityScore {
-        fn from(value: super::SustainityScore) -> Self {
-            Self {
-                total: Ok(value.total),
-                tree: Ok(value.tree),
-            }
-        }
-    }
-    #[derive(Clone, Debug)]
-    pub struct SustainityScoreBranch {
-        branches: Result<Vec<super::SustainityScoreBranch>, String>,
-        category: Result<super::SustainityScoreCategory, String>,
-        score: Result<f64, String>,
-        weight: Result<i64, String>,
-    }
-    impl Default for SustainityScoreBranch {
-        fn default() -> Self {
-            Self {
-                branches: Err("no value supplied for branches".to_string()),
-                category: Err("no value supplied for category".to_string()),
-                score: Err("no value supplied for score".to_string()),
-                weight: Err("no value supplied for weight".to_string()),
-            }
-        }
-    }
-    impl SustainityScoreBranch {
-        pub fn branches<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<Vec<super::SustainityScoreBranch>>,
-            T::Error: std::fmt::Display,
-        {
-            self.branches = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for branches: {}", e));
-            self
-        }
-        pub fn category<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<super::SustainityScoreCategory>,
-            T::Error: std::fmt::Display,
-        {
-            self.category = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for category: {}", e));
-            self
-        }
-        pub fn score<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<f64>,
-            T::Error: std::fmt::Display,
-        {
-            self.score = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for score: {}", e));
-            self
-        }
-        pub fn weight<T>(mut self, value: T) -> Self
-        where
-            T: std::convert::TryInto<i64>,
-            T::Error: std::fmt::Display,
-        {
-            self.weight = value
-                .try_into()
-                .map_err(|e| format!("error converting supplied value for weight: {}", e));
-            self
-        }
-    }
-    impl std::convert::TryFrom<SustainityScoreBranch> for super::SustainityScoreBranch {
-        type Error = super::error::ConversionError;
-        fn try_from(value: SustainityScoreBranch) -> Result<Self, super::error::ConversionError> {
-            Ok(Self {
-                branches: value.branches?,
-                category: value.category?,
-                score: value.score?,
-                weight: value.weight?,
-            })
-        }
-    }
-    impl From<super::SustainityScoreBranch> for SustainityScoreBranch {
-        fn from(value: super::SustainityScoreBranch) -> Self {
-            Self {
-                branches: Ok(value.branches),
-                category: Ok(value.category),
-                score: Ok(value.score),
-                weight: Ok(value.weight),
-            }
-        }
-    }
-    #[derive(Clone, Debug)]
     pub struct TcoMedallion {
         brand_name: Result<super::ShortString, String>,
     }
@@ -5182,6 +5012,176 @@ pub mod builder {
         fn from(value: super::TextSearchResults) -> Self {
             Self {
                 results: Ok(value.results),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct TranspaerMedallion {
+        score: Result<super::TranspaerScore, String>,
+    }
+    impl Default for TranspaerMedallion {
+        fn default() -> Self {
+            Self {
+                score: Err("no value supplied for score".to_string()),
+            }
+        }
+    }
+    impl TranspaerMedallion {
+        pub fn score<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::TranspaerScore>,
+            T::Error: std::fmt::Display,
+        {
+            self.score = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for score: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<TranspaerMedallion> for super::TranspaerMedallion {
+        type Error = super::error::ConversionError;
+        fn try_from(value: TranspaerMedallion) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                score: value.score?,
+            })
+        }
+    }
+    impl From<super::TranspaerMedallion> for TranspaerMedallion {
+        fn from(value: super::TranspaerMedallion) -> Self {
+            Self {
+                score: Ok(value.score),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct TranspaerScore {
+        total: Result<f64, String>,
+        tree: Result<Vec<super::TranspaerScoreBranch>, String>,
+    }
+    impl Default for TranspaerScore {
+        fn default() -> Self {
+            Self {
+                total: Err("no value supplied for total".to_string()),
+                tree: Err("no value supplied for tree".to_string()),
+            }
+        }
+    }
+    impl TranspaerScore {
+        pub fn total<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<f64>,
+            T::Error: std::fmt::Display,
+        {
+            self.total = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for total: {}", e));
+            self
+        }
+        pub fn tree<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::TranspaerScoreBranch>>,
+            T::Error: std::fmt::Display,
+        {
+            self.tree = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for tree: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<TranspaerScore> for super::TranspaerScore {
+        type Error = super::error::ConversionError;
+        fn try_from(value: TranspaerScore) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                total: value.total?,
+                tree: value.tree?,
+            })
+        }
+    }
+    impl From<super::TranspaerScore> for TranspaerScore {
+        fn from(value: super::TranspaerScore) -> Self {
+            Self {
+                total: Ok(value.total),
+                tree: Ok(value.tree),
+            }
+        }
+    }
+    #[derive(Clone, Debug)]
+    pub struct TranspaerScoreBranch {
+        branches: Result<Vec<super::TranspaerScoreBranch>, String>,
+        category: Result<super::TranspaerScoreCategory, String>,
+        score: Result<f64, String>,
+        weight: Result<i64, String>,
+    }
+    impl Default for TranspaerScoreBranch {
+        fn default() -> Self {
+            Self {
+                branches: Err("no value supplied for branches".to_string()),
+                category: Err("no value supplied for category".to_string()),
+                score: Err("no value supplied for score".to_string()),
+                weight: Err("no value supplied for weight".to_string()),
+            }
+        }
+    }
+    impl TranspaerScoreBranch {
+        pub fn branches<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<Vec<super::TranspaerScoreBranch>>,
+            T::Error: std::fmt::Display,
+        {
+            self.branches = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for branches: {}", e));
+            self
+        }
+        pub fn category<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<super::TranspaerScoreCategory>,
+            T::Error: std::fmt::Display,
+        {
+            self.category = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for category: {}", e));
+            self
+        }
+        pub fn score<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<f64>,
+            T::Error: std::fmt::Display,
+        {
+            self.score = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for score: {}", e));
+            self
+        }
+        pub fn weight<T>(mut self, value: T) -> Self
+        where
+            T: std::convert::TryInto<i64>,
+            T::Error: std::fmt::Display,
+        {
+            self.weight = value
+                .try_into()
+                .map_err(|e| format!("error converting supplied value for weight: {}", e));
+            self
+        }
+    }
+    impl std::convert::TryFrom<TranspaerScoreBranch> for super::TranspaerScoreBranch {
+        type Error = super::error::ConversionError;
+        fn try_from(value: TranspaerScoreBranch) -> Result<Self, super::error::ConversionError> {
+            Ok(Self {
+                branches: value.branches?,
+                category: value.category?,
+                score: value.score?,
+                weight: value.weight?,
+            })
+        }
+    }
+    impl From<super::TranspaerScoreBranch> for TranspaerScoreBranch {
+        fn from(value: super::TranspaerScoreBranch) -> Self {
+            Self {
+                branches: Ok(value.branches),
+                category: Ok(value.category),
+                score: Ok(value.score),
+                weight: Ok(value.weight),
             }
         }
     }

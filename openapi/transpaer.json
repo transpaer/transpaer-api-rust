@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.0",
   "info": {
-    "title": "Sustainity",
-    "description": "API for the sustaininty backend\n",
-    "version": "0.4.0"
+    "title": "Transpaer",
+    "description": "API for the transpaer backend\n",
+    "version": "0.1.0"
   },
   "paths": {
     "/": {
