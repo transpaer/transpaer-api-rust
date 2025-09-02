@@ -890,45 +890,30 @@ impl LibraryItemShort {
 #[doc = "  \"description\": \"Name of a topic in the library.\","]
 #[doc = "  \"type\": \"string\","]
 #[doc = "  \"enum\": ["]
-#[doc = "    \"info:main\","]
-#[doc = "    \"info:for_producers\","]
-#[doc = "    \"info:faq\","]
-#[doc = "    \"info:greenwashing\","]
-#[doc = "    \"data:wiki\","]
-#[doc = "    \"data:open_food_facts\","]
-#[doc = "    \"cert:bcorp\","]
-#[doc = "    \"cert:eu_ecolabel\","]
-#[doc = "    \"cert:tco\","]
-#[doc = "    \"cert:fti\","]
-#[doc = "    \"other:not_found\""]
+#[doc = "    \"wiki\","]
+#[doc = "    \"open_food_facts\","]
+#[doc = "    \"bcorp\","]
+#[doc = "    \"eu_ecolabel\","]
+#[doc = "    \"tco\","]
+#[doc = "    \"fti\""]
 #[doc = "  ]"]
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, Ord, PartialEq, PartialOrd, Serialize)]
 pub enum LibraryTopic {
-    #[serde(rename = "info:main")]
-    InfoMain,
-    #[serde(rename = "info:for_producers")]
-    InfoForProducers,
-    #[serde(rename = "info:faq")]
-    InfoFaq,
-    #[serde(rename = "info:greenwashing")]
-    InfoGreenwashing,
-    #[serde(rename = "data:wiki")]
-    DataWiki,
-    #[serde(rename = "data:open_food_facts")]
-    DataOpenFoodFacts,
-    #[serde(rename = "cert:bcorp")]
-    CertBcorp,
-    #[serde(rename = "cert:eu_ecolabel")]
-    CertEuEcolabel,
-    #[serde(rename = "cert:tco")]
-    CertTco,
-    #[serde(rename = "cert:fti")]
-    CertFti,
-    #[serde(rename = "other:not_found")]
-    OtherNotFound,
+    #[serde(rename = "wiki")]
+    Wiki,
+    #[serde(rename = "open_food_facts")]
+    OpenFoodFacts,
+    #[serde(rename = "bcorp")]
+    Bcorp,
+    #[serde(rename = "eu_ecolabel")]
+    EuEcolabel,
+    #[serde(rename = "tco")]
+    Tco,
+    #[serde(rename = "fti")]
+    Fti,
 }
 impl From<&LibraryTopic> for LibraryTopic {
     fn from(value: &LibraryTopic) -> Self {
@@ -938,17 +923,12 @@ impl From<&LibraryTopic> for LibraryTopic {
 impl ToString for LibraryTopic {
     fn to_string(&self) -> String {
         match *self {
-            Self::InfoMain => "info:main".to_string(),
-            Self::InfoForProducers => "info:for_producers".to_string(),
-            Self::InfoFaq => "info:faq".to_string(),
-            Self::InfoGreenwashing => "info:greenwashing".to_string(),
-            Self::DataWiki => "data:wiki".to_string(),
-            Self::DataOpenFoodFacts => "data:open_food_facts".to_string(),
-            Self::CertBcorp => "cert:bcorp".to_string(),
-            Self::CertEuEcolabel => "cert:eu_ecolabel".to_string(),
-            Self::CertTco => "cert:tco".to_string(),
-            Self::CertFti => "cert:fti".to_string(),
-            Self::OtherNotFound => "other:not_found".to_string(),
+            Self::Wiki => "wiki".to_string(),
+            Self::OpenFoodFacts => "open_food_facts".to_string(),
+            Self::Bcorp => "bcorp".to_string(),
+            Self::EuEcolabel => "eu_ecolabel".to_string(),
+            Self::Tco => "tco".to_string(),
+            Self::Fti => "fti".to_string(),
         }
     }
 }
@@ -956,17 +936,12 @@ impl std::str::FromStr for LibraryTopic {
     type Err = self::error::ConversionError;
     fn from_str(value: &str) -> Result<Self, self::error::ConversionError> {
         match value {
-            "info:main" => Ok(Self::InfoMain),
-            "info:for_producers" => Ok(Self::InfoForProducers),
-            "info:faq" => Ok(Self::InfoFaq),
-            "info:greenwashing" => Ok(Self::InfoGreenwashing),
-            "data:wiki" => Ok(Self::DataWiki),
-            "data:open_food_facts" => Ok(Self::DataOpenFoodFacts),
-            "cert:bcorp" => Ok(Self::CertBcorp),
-            "cert:eu_ecolabel" => Ok(Self::CertEuEcolabel),
-            "cert:tco" => Ok(Self::CertTco),
-            "cert:fti" => Ok(Self::CertFti),
-            "other:not_found" => Ok(Self::OtherNotFound),
+            "wiki" => Ok(Self::Wiki),
+            "open_food_facts" => Ok(Self::OpenFoodFacts),
+            "bcorp" => Ok(Self::Bcorp),
+            "eu_ecolabel" => Ok(Self::EuEcolabel),
+            "tco" => Ok(Self::Tco),
+            "fti" => Ok(Self::Fti),
             _ => Err("invalid value".into()),
         }
     }
