@@ -467,10 +467,10 @@ components:
       example:
         items:
         - summary: summary
-          id: info:main
+          id: wiki
           title: title
         - summary: summary
-          id: info:main
+          id: wiki
           title: title
       properties:
         items:
@@ -484,7 +484,7 @@ components:
       description: Short summary of a library item.
       example:
         summary: summary
-        id: info:main
+        id: wiki
         title: title
       properties:
         id:
@@ -505,17 +505,12 @@ components:
     libraryTopic:
       description: Name of a topic in the library.
       enum:
-      - info:main
-      - info:for_producers
-      - info:faq
-      - info:greenwashing
-      - data:wiki
-      - data:open_food_facts
-      - cert:bcorp
-      - cert:eu_ecolabel
-      - cert:tco
-      - cert:fti
-      - other:not_found
+      - wiki
+      - open_food_facts
+      - bcorp
+      - eu_ecolabel
+      - tco
+      - fti
       type: string
     libraryItemFull:
       description: Full contents of a library item.
@@ -534,7 +529,7 @@ components:
           title: title
         - link: link
           title: title
-        id: info:main
+        id: wiki
         title: title
         article: article
       properties:
