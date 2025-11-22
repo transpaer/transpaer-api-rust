@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**id** | [***models::LibraryTopic**](libraryTopic.md) |  | 
+**id** | **String** | Name of a topic in the library. | 
 **title** | **String** | Short string for labels, titles, summaries... | 
 **summary** | **String** | Short string for labels, titles, summaries... | 
 

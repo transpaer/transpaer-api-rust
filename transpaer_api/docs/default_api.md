@@ -126,7 +126,7 @@ Returns a full library item.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
-  **topic** | [****](.md)| Library topic. | 
+  **topic** | **String**| Library topic. | 
 
 ### Return type
 
