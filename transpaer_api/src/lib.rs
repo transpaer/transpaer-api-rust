@@ -229,10 +229,6 @@ pub enum GetProductResponse {
 #[async_trait]
 #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
 pub trait Api<C: Send + Sync> {
-    fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>> {
-        Poll::Ready(Ok(()))
-    }
-
     /// Health check
     async fn check_health(
         &self,
@@ -258,7 +254,7 @@ pub trait Api<C: Send + Sync> {
     /// Get library item.
     async fn get_library_item(
         &self,
-        topic: models::LibraryTopic,
+        topic: String,
         context: &C) -> Result<GetLibraryItemResponse, ApiError>;
 
     /// Get product alternatives.
@@ -291,8 +287,6 @@ pub trait Api<C: Send + Sync> {
 #[allow(clippy::too_many_arguments, clippy::ptr_arg)]
 pub trait ApiNoContext<C: Send + Sync> {
 
-    fn poll_ready(&self, _cx: &mut Context) -> Poll<Result<(), Box<dyn Error + Send + Sync + 'static>>>;
-
     fn context(&self) -> &C;
 
     /// Health check
@@ -320,7 +314,7 @@ pub trait ApiNoContext<C: Send + Sync> {
     /// Get library item.
     async fn get_library_item(
         &self,
-        topic: models::LibraryTopic,
+        topic: String,
         ) -> Result<GetLibraryItemResponse, ApiError>;
 
     /// Get product alternatives.
@@ -363,10 +357,6 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ContextWrapperExt<C> for T
 
 #[async_trait]
 impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for ContextWrapper<T, C> {
-    fn poll_ready(&self, cx: &mut Context) -> Poll<Result<(), ServiceError>> {
-        self.api().poll_ready(cx)
-    }
-
     fn context(&self) -> &C {
         ContextWrapper::context(self)
     }
@@ -412,7 +402,7 @@ impl<T: Api<C> + Send + Sync, C: Clone + Send + Sync> ApiNoContext<C> for Contex
     /// Get library item.
     async fn get_library_item(
         &self,
-        topic: models::LibraryTopic,
+        topic: String,
         ) -> Result<GetLibraryItemResponse, ApiError>
     {
         let context = self.context().clone();

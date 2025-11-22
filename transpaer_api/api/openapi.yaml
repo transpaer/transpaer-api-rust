@@ -16,11 +16,11 @@ paths:
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Health check
   /search/text:
     get:
@@ -33,22 +33,22 @@ paths:
         name: query
         required: true
         schema:
-          $ref: '#/components/schemas/shortString'
+          $ref: "#/components/schemas/shortString"
         style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/textSearchResults'
+                $ref: "#/components/schemas/textSearchResults"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Text search.
   /library:
     get:
@@ -59,15 +59,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/libraryContents'
+                $ref: "#/components/schemas/libraryContents"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get library contents.
   /library/{topic}:
     get:
@@ -80,31 +80,31 @@ paths:
         name: topic
         required: true
         schema:
-          $ref: '#/components/schemas/libraryTopic'
+          $ref: "#/components/schemas/libraryTopic"
         style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/libraryItemFull'
+                $ref: "#/components/schemas/libraryItemFull"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
         "404":
           description: Not found
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get library item.
   /organisation/{organisationIdVariant}:{id}:
     get:
@@ -117,7 +117,7 @@ paths:
         name: organisationIdVariant
         required: true
         schema:
-          $ref: '#/components/schemas/organisationIdVariant'
+          $ref: "#/components/schemas/organisationIdVariant"
         style: simple
       - description: ID of a resource.
         explode: false
@@ -125,31 +125,31 @@ paths:
         name: id
         required: true
         schema:
-          $ref: '#/components/schemas/id'
+          $ref: "#/components/schemas/id"
         style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/organisationFull'
+                $ref: "#/components/schemas/organisationFull"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
         "404":
           description: Not found
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get organisation.
   /product/{productIdVariant}:{id}:
     get:
@@ -162,7 +162,7 @@ paths:
         name: productIdVariant
         required: true
         schema:
-          $ref: '#/components/schemas/productIdVariant'
+          $ref: "#/components/schemas/productIdVariant"
         style: simple
       - description: ID of a resource.
         explode: false
@@ -170,7 +170,7 @@ paths:
         name: id
         required: true
         schema:
-          $ref: '#/components/schemas/id'
+          $ref: "#/components/schemas/id"
         style: simple
       - description: Region code.
         explode: true
@@ -178,31 +178,31 @@ paths:
         name: region
         required: false
         schema:
-          $ref: '#/components/schemas/regionCode'
+          $ref: "#/components/schemas/regionCode"
         style: form
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/productFull'
+                $ref: "#/components/schemas/productFull"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
         "404":
           description: Not found
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get product.
   /product/{productIdVariant}:{id}/alternatives:
     get:
@@ -215,7 +215,7 @@ paths:
         name: productIdVariant
         required: true
         schema:
-          $ref: '#/components/schemas/productIdVariant'
+          $ref: "#/components/schemas/productIdVariant"
         style: simple
       - description: ID of a resource.
         explode: false
@@ -223,7 +223,7 @@ paths:
         name: id
         required: true
         schema:
-          $ref: '#/components/schemas/id'
+          $ref: "#/components/schemas/id"
         style: simple
       - description: Region code.
         explode: true
@@ -231,7 +231,7 @@ paths:
         name: region
         required: false
         schema:
-          $ref: '#/components/schemas/regionCode'
+          $ref: "#/components/schemas/regionCode"
         style: form
       responses:
         "200":
@@ -239,25 +239,25 @@ paths:
             application/json:
               schema:
                 items:
-                  $ref: '#/components/schemas/categoryAlternatives'
+                  $ref: "#/components/schemas/categoryAlternatives"
                 type: array
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
         "404":
           description: Not found
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get product alternatives.
   /category/{category}:
     get:
@@ -270,31 +270,31 @@ paths:
         name: category
         required: true
         schema:
-          $ref: '#/components/schemas/category'
+          $ref: "#/components/schemas/category"
         style: simple
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/categoryFull'
+                $ref: "#/components/schemas/categoryFull"
           description: Ok
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
         "404":
           description: Not found
           headers:
             Access-Control-Allow-Origin:
-              $ref: '#/components/headers/corsOrigin'
+              $ref: "#/components/headers/corsOrigin"
             Access-Control-Allow-Methods:
-              $ref: '#/components/headers/corsMethods'
+              $ref: "#/components/headers/corsMethods"
             Access-Control-Allow-Headers:
-              $ref: '#/components/headers/corsHeaders'
+              $ref: "#/components/headers/corsHeaders"
       summary: Get category.
 components:
   headers:
@@ -324,7 +324,7 @@ components:
       name: organisationIdVariant
       required: true
       schema:
-        $ref: '#/components/schemas/organisationIdVariant'
+        $ref: "#/components/schemas/organisationIdVariant"
       style: simple
     productIdVariant:
       description: Variant of a product ID.
@@ -333,7 +333,7 @@ components:
       name: productIdVariant
       required: true
       schema:
-        $ref: '#/components/schemas/productIdVariant'
+        $ref: "#/components/schemas/productIdVariant"
       style: simple
     id:
       description: ID of a resource.
@@ -342,7 +342,7 @@ components:
       name: id
       required: true
       schema:
-        $ref: '#/components/schemas/id'
+        $ref: "#/components/schemas/id"
       style: simple
     category:
       description: Category path.
@@ -351,7 +351,7 @@ components:
       name: category
       required: true
       schema:
-        $ref: '#/components/schemas/category'
+        $ref: "#/components/schemas/category"
       style: simple
     regionCode:
       description: Region code.
@@ -360,7 +360,7 @@ components:
       name: region
       required: false
       schema:
-        $ref: '#/components/schemas/regionCode'
+        $ref: "#/components/schemas/regionCode"
       style: form
     libraryTopic:
       description: Library topic.
@@ -369,7 +369,7 @@ components:
       name: topic
       required: true
       schema:
-        $ref: '#/components/schemas/libraryTopic'
+        $ref: "#/components/schemas/libraryTopic"
       style: simple
     query:
       description: Text query for search.
@@ -378,7 +378,7 @@ components:
       name: query
       required: true
       schema:
-        $ref: '#/components/schemas/shortString'
+        $ref: "#/components/schemas/shortString"
       style: form
   schemas:
     shortString:
@@ -402,7 +402,7 @@ components:
       properties:
         results:
           items:
-            $ref: '#/components/schemas/textSearchResult'
+            $ref: "#/components/schemas/textSearchResult"
           type: array
       required:
       - results
@@ -417,7 +417,7 @@ components:
         label: label
       properties:
         link:
-          $ref: '#/components/schemas/textSearchLinkHack'
+          $ref: "#/components/schemas/textSearchLinkHack"
         label:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
@@ -434,9 +434,9 @@ components:
         organisation_id_variant: wiki
       properties:
         organisation_id_variant:
-          $ref: '#/components/schemas/organisationIdVariant'
+          $ref: "#/components/schemas/organisationIdVariant"
         product_id_variant:
-          $ref: '#/components/schemas/productIdVariant'
+          $ref: "#/components/schemas/productIdVariant"
         id:
           description: ID of a resource.
           maxLength: 32
@@ -467,15 +467,15 @@ components:
       example:
         items:
         - summary: summary
-          id: wiki
+          id: id
           title: title
         - summary: summary
-          id: wiki
+          id: id
           title: title
       properties:
         items:
           items:
-            $ref: '#/components/schemas/libraryItemShort'
+            $ref: "#/components/schemas/libraryItemShort"
           type: array
       required:
       - items
@@ -484,11 +484,12 @@ components:
       description: Short summary of a library item.
       example:
         summary: summary
-        id: wiki
+        id: id
         title: title
       properties:
         id:
-          $ref: '#/components/schemas/libraryTopic'
+          description: Name of a topic in the library.
+          type: string
         title:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
@@ -504,13 +505,6 @@ components:
       type: object
     libraryTopic:
       description: Name of a topic in the library.
-      enum:
-      - wiki
-      - open_food_facts
-      - bcorp
-      - eu_ecolabel
-      - tco
-      - fti
       type: string
     libraryItemFull:
       description: Full contents of a library item.
@@ -529,12 +523,13 @@ components:
           title: title
         - link: link
           title: title
-        id: wiki
+        id: id
         title: title
         article: article
       properties:
         id:
-          $ref: '#/components/schemas/libraryTopic'
+          description: Name of a topic in the library.
+          type: string
         title:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
@@ -549,10 +544,10 @@ components:
           type: string
         links:
           items:
-            $ref: '#/components/schemas/referenceLink'
+            $ref: "#/components/schemas/referenceLink"
           type: array
         presentation:
-          $ref: '#/components/schemas/presentation'
+          $ref: "#/components/schemas/presentation"
       required:
       - article
       - id
@@ -591,7 +586,7 @@ components:
       properties:
         data:
           items:
-            $ref: '#/components/schemas/presentationEntry'
+            $ref: "#/components/schemas/presentationEntry"
           type: array
       required:
       - data
@@ -765,38 +760,38 @@ components:
             source: null
       properties:
         organisationIds:
-          $ref: '#/components/schemas/organisationIds'
+          $ref: "#/components/schemas/organisationIds"
         names:
           items:
-            $ref: '#/components/schemas/shortText'
+            $ref: "#/components/schemas/shortText"
           type: array
         descriptions:
           items:
-            $ref: '#/components/schemas/longText'
+            $ref: "#/components/schemas/longText"
           type: array
         images:
           items:
-            $ref: '#/components/schemas/image'
+            $ref: "#/components/schemas/image"
           type: array
         websites:
           items:
-            $ref: '#/components/schemas/shortString'
+            $ref: "#/components/schemas/shortString"
           type: array
         origins:
           items:
-            $ref: '#/components/schemas/regionCode'
+            $ref: "#/components/schemas/regionCode"
           type: array
         media:
           items:
-            $ref: '#/components/schemas/medium'
+            $ref: "#/components/schemas/medium"
           type: array
         products:
           items:
-            $ref: '#/components/schemas/productShort'
+            $ref: "#/components/schemas/productShort"
           type: array
         medallions:
           items:
-            $ref: '#/components/schemas/medallion'
+            $ref: "#/components/schemas/medallion"
           type: array
       required:
       - descriptions
@@ -822,15 +817,15 @@ components:
       properties:
         wiki:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
         vat:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
         domains:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
       type: object
     shortText:
@@ -844,7 +839,7 @@ components:
           maxLength: 1024
           type: string
         source:
-          $ref: '#/components/schemas/dataSource'
+          $ref: "#/components/schemas/dataSource"
       required:
       - source
       - text
@@ -872,7 +867,7 @@ components:
           maxLength: 1048576
           type: string
         source:
-          $ref: '#/components/schemas/dataSource'
+          $ref: "#/components/schemas/dataSource"
       required:
       - source
       - text
@@ -886,7 +881,7 @@ components:
         image:
           type: string
         source:
-          $ref: '#/components/schemas/dataSource'
+          $ref: "#/components/schemas/dataSource"
       required:
       - image
       - source
@@ -907,7 +902,7 @@ components:
       properties:
         mentions:
           items:
-            $ref: '#/components/schemas/mention'
+            $ref: "#/components/schemas/mention"
           type: array
         icon:
           type: string
@@ -954,20 +949,20 @@ components:
           source: null
       properties:
         productIds:
-          $ref: '#/components/schemas/productIds'
+          $ref: "#/components/schemas/productIds"
         name:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
         description:
-          $ref: '#/components/schemas/longText'
+          $ref: "#/components/schemas/longText"
         badges:
           items:
-            $ref: '#/components/schemas/badgeName'
+            $ref: "#/components/schemas/badgeName"
           type: array
         scores:
           items:
-            $ref: '#/components/schemas/score'
+            $ref: "#/components/schemas/score"
           type: array
       required:
       - badges
@@ -990,15 +985,15 @@ components:
       properties:
         eans:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
         gtins:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
         wiki:
           items:
-            $ref: '#/components/schemas/id'
+            $ref: "#/components/schemas/id"
           type: array
       type: object
     badgeName:
@@ -1015,7 +1010,7 @@ components:
         scorerName: fti
       properties:
         scorerName:
-          $ref: '#/components/schemas/scorerName'
+          $ref: "#/components/schemas/scorerName"
         score:
           format: int64
           type: integer
@@ -1059,17 +1054,17 @@ components:
           id: id
       properties:
         variant:
-          $ref: '#/components/schemas/medallionVariant'
+          $ref: "#/components/schemas/medallionVariant"
         bcorp:
-          $ref: '#/components/schemas/bCorpMedallion'
+          $ref: "#/components/schemas/bCorpMedallion"
         euEcolabel:
-          $ref: '#/components/schemas/euEcolabelMedallion'
+          $ref: "#/components/schemas/euEcolabelMedallion"
         fti:
-          $ref: '#/components/schemas/ftiMedallion'
+          $ref: "#/components/schemas/ftiMedallion"
         transpaer:
-          $ref: '#/components/schemas/transpaerMedallion'
+          $ref: "#/components/schemas/transpaerMedallion"
         tco:
-          $ref: '#/components/schemas/tcoMedallion'
+          $ref: "#/components/schemas/tcoMedallion"
       required:
       - variant
       type: object
@@ -1149,7 +1144,7 @@ components:
             - null
       properties:
         score:
-          $ref: '#/components/schemas/transpaerScore'
+          $ref: "#/components/schemas/transpaerScore"
       required:
       - score
       type: object
@@ -1176,7 +1171,7 @@ components:
           type: number
         tree:
           items:
-            $ref: '#/components/schemas/transpaerScoreBranch'
+            $ref: "#/components/schemas/transpaerScoreBranch"
           type: array
       required:
       - total
@@ -1193,7 +1188,7 @@ components:
         - null
       properties:
         category:
-          $ref: '#/components/schemas/transpaerScoreCategory'
+          $ref: "#/components/schemas/transpaerScoreCategory"
         weight:
           type: integer
         score:
@@ -1201,7 +1196,7 @@ components:
           type: number
         branches:
           items:
-            $ref: '#/components/schemas/transpaerScoreBranch'
+            $ref: "#/components/schemas/transpaerScoreBranch"
           type: array
       required:
       - branches
@@ -1481,42 +1476,42 @@ components:
           description: description
       properties:
         productIds:
-          $ref: '#/components/schemas/productIds'
+          $ref: "#/components/schemas/productIds"
         names:
           items:
-            $ref: '#/components/schemas/shortText'
+            $ref: "#/components/schemas/shortText"
           type: array
         descriptions:
           items:
-            $ref: '#/components/schemas/longText'
+            $ref: "#/components/schemas/longText"
           type: array
         images:
           items:
-            $ref: '#/components/schemas/image'
+            $ref: "#/components/schemas/image"
           type: array
         origins:
           items:
-            $ref: '#/components/schemas/regionCode'
+            $ref: "#/components/schemas/regionCode"
           type: array
         manufacturers:
           items:
-            $ref: '#/components/schemas/organisationShort'
+            $ref: "#/components/schemas/organisationShort"
           type: array
         alternatives:
           items:
-            $ref: '#/components/schemas/categoryAlternatives'
+            $ref: "#/components/schemas/categoryAlternatives"
           type: array
         medallions:
           items:
-            $ref: '#/components/schemas/medallion'
+            $ref: "#/components/schemas/medallion"
           type: array
         shopping:
           items:
-            $ref: '#/components/schemas/shoppingEntry'
+            $ref: "#/components/schemas/shoppingEntry"
           type: array
         media:
           items:
-            $ref: '#/components/schemas/medium'
+            $ref: "#/components/schemas/medium"
           type: array
       required:
       - alternatives
@@ -1556,20 +1551,20 @@ components:
           - null
       properties:
         organisationIds:
-          $ref: '#/components/schemas/organisationIds'
+          $ref: "#/components/schemas/organisationIds"
         name:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
         description:
-          $ref: '#/components/schemas/longText'
+          $ref: "#/components/schemas/longText"
         badges:
           items:
-            $ref: '#/components/schemas/badgeName'
+            $ref: "#/components/schemas/badgeName"
           type: array
         scores:
           items:
-            $ref: '#/components/schemas/score'
+            $ref: "#/components/schemas/score"
           type: array
       required:
       - badges
@@ -1634,7 +1629,7 @@ components:
           type: string
         alternatives:
           items:
-            $ref: '#/components/schemas/productShort'
+            $ref: "#/components/schemas/productShort"
           type: array
       required:
       - alternatives
@@ -1649,7 +1644,7 @@ components:
         description: description
       properties:
         shop:
-          $ref: '#/components/schemas/verifiedShop'
+          $ref: "#/components/schemas/verifiedShop"
         link:
           type: string
         description:
@@ -1734,18 +1729,18 @@ components:
         label:
           type: string
         status:
-          $ref: '#/components/schemas/categoryStatus'
+          $ref: "#/components/schemas/categoryStatus"
         subcategories:
           items:
-            $ref: '#/components/schemas/categoryShort'
+            $ref: "#/components/schemas/categoryShort"
           type: array
         supercategories:
           items:
-            $ref: '#/components/schemas/categoryShort'
+            $ref: "#/components/schemas/categoryShort"
           type: array
         products:
           items:
-            $ref: '#/components/schemas/productShort'
+            $ref: "#/components/schemas/productShort"
           type: array
       required:
       - label
