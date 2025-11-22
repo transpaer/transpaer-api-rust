@@ -15,8 +15,8 @@ To see how to make this your own, look here:
 [README]((https://openapi-generator.tech))
 
 - API version: 0.1.0
-- Build date: 2025-09-02T22:22:10.988598+02:00[Europe/Amsterdam]
-- Generator version: 7.13.0
+- Build date: 2025-11-22T22:51:58.185418+01:00[Europe/Amsterdam]
+- Generator version: 7.15.0
 
 
 
@@ -92,6 +92,7 @@ cargo run --example client CheckHealth
 cargo run --example client GetLibrary
 cargo run --example client SearchByText
 cargo run --example client GetCategory
+cargo run --example client GetLibraryItem
 ```
 
 ### HTTPS

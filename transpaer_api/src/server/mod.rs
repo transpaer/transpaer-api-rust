@@ -1,10 +1,12 @@
+use bytes::Bytes;
 use futures::{future, future::BoxFuture, Stream, stream, future::FutureExt, stream::TryStreamExt};
-use hyper::{Request, Response, StatusCode, Body, HeaderMap};
+use http_body_util::{combinators::BoxBody, Full};
+use hyper::{body::{Body, Incoming}, HeaderMap, Request, Response, StatusCode};
 use hyper::header::{HeaderName, HeaderValue, CONTENT_TYPE};
 use log::warn;
 #[allow(unused_imports)]
 use std::convert::{TryFrom, TryInto};
-use std::error::Error;
+use std::{convert::Infallible, error::Error};
 use std::future::Future;
 use std::marker::PhantomData;
 use std::task::{Context, Poll};
@@ -18,7 +20,7 @@ use crate::{models, header, AuthenticationApi};
 
 pub use crate::context;
 
-type ServiceFuture = BoxFuture<'static, Result<Response<Body>, crate::ServiceError>>;
+type ServiceFuture = BoxFuture<'static, Result<Response<BoxBody<Bytes, Infallible>>, crate::ServiceError>>;
 
 use crate::{Api,
      CheckHealthResponse,
@@ -90,7 +92,8 @@ mod paths {
 }
 
 
-pub struct MakeService<T, C> where
+pub struct MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
     C: Has<XSpanIdString>  + Send + Sync + 'static
 {
@@ -98,7 +101,8 @@ pub struct MakeService<T, C> where
     marker: PhantomData<C>,
 }
 
-impl<T, C> MakeService<T, C> where
+impl<T, C> MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
     C: Has<XSpanIdString>  + Send + Sync + 'static
 {
@@ -110,7 +114,21 @@ impl<T, C> MakeService<T, C> where
     }
 }
 
-impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
+impl<T, C> Clone for MakeService<T, C>
+where
+    T: Api<C> + Clone + Send + 'static,
+    C: Has<XSpanIdString>   + Send + Sync + 'static
+{
+    fn clone(&self) -> Self {
+        Self {
+            api_impl: self.api_impl.clone(),
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C>
+where
     T: Api<C> + Clone + Send + 'static,
     C: Has<XSpanIdString>  + Send + Sync + 'static
 {
@@ -118,21 +136,17 @@ impl<T, C, Target> hyper::service::Service<Target> for MakeService<T, C> where
     type Error = crate::ServiceError;
     type Future = future::Ready<Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        Poll::Ready(Ok(()))
-    }
-
-    fn call(&mut self, target: Target) -> Self::Future {
+    fn call(&self, target: Target) -> Self::Future {
         let service = Service::new(self.api_impl.clone());
 
         future::ok(service)
     }
 }
 
-fn method_not_allowed() -> Result<Response<Body>, crate::ServiceError> {
+fn method_not_allowed() -> Result<Response<BoxBody<Bytes, Infallible>>, crate::ServiceError> {
     Ok(
         Response::builder().status(StatusCode::METHOD_NOT_ALLOWED)
-            .body(Body::empty())
+            .body(BoxBody::new(http_body_util::Empty::new()))
             .expect("Unable to create Method Not Allowed response")
     )
 }
@@ -169,25 +183,37 @@ impl<T, C> Clone for Service<T, C> where
     }
 }
 
-impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
+#[allow(dead_code)]
+fn body_from_string(s: String) -> BoxBody<Bytes, Infallible> {
+    BoxBody::new(Full::new(Bytes::from(s)))
+}
+
+fn body_from_str(s: &str) -> BoxBody<Bytes, Infallible> {
+    BoxBody::new(Full::new(Bytes::copy_from_slice(s.as_bytes())))
+}
+
+impl<T, C, ReqBody> hyper::service::Service<(Request<ReqBody>, C)> for Service<T, C> where
     T: Api<C> + Clone + Send + Sync + 'static,
-    C: Has<XSpanIdString>  + Send + Sync + 'static
+    C: Has<XSpanIdString>  + Send + Sync + 'static,
+    ReqBody: Body + Send + 'static,
+    ReqBody::Error: Into<Box<dyn Error + Send + Sync>> + Send,
+    ReqBody::Data: Send,
 {
-    type Response = Response<Body>;
+    type Response = Response<BoxBody<Bytes, Infallible>>;
     type Error = crate::ServiceError;
     type Future = ServiceFuture;
 
-    fn poll_ready(&mut self, cx: &mut Context) -> Poll<Result<(), Self::Error>> {
-        self.api_impl.poll_ready(cx)
-    }
-
-    fn call(&mut self, req: (Request<Body>, C)) -> Self::Future {
-        async fn run<T, C>(
+    fn call(&self, req: (Request<ReqBody>, C)) -> Self::Future {
+        async fn run<T, C, ReqBody>(
             mut api_impl: T,
-            req: (Request<Body>, C),
-        ) -> Result<Response<Body>, crate::ServiceError> where
+            req: (Request<ReqBody>, C),
+        ) -> Result<Response<BoxBody<Bytes, Infallible>>, crate::ServiceError>
+        where
             T: Api<C> + Clone + Send + 'static,
-            C: Has<XSpanIdString>  + Send + Sync + 'static
+            C: Has<XSpanIdString>  + Send + Sync + 'static,
+            ReqBody: Body + Send + 'static,
+            ReqBody::Error: Into<Box<dyn Error + Send + Sync>> + Send,
+            ReqBody::Data: Send,
         {
             let (request, context) = req;
             let (parts, body) = request.into_parts();
@@ -201,7 +227,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                 let result = api_impl.check_health(
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -223,7 +249,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -238,7 +264,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -253,7 +279,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -269,7 +295,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -281,7 +307,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                 let result = api_impl.get_library(
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -304,7 +330,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -319,7 +345,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -334,7 +360,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -345,11 +371,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                             },
@@ -357,7 +382,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -379,7 +404,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             Ok(param_query) => Some(param_query),
                             Err(e) => return Ok(Response::builder()
                                 .status(StatusCode::BAD_REQUEST)
-                                .body(Body::from(format!("Couldn't parse query parameter query - doesn't match schema: {}", e)))
+                                .body(body_from_string(format!("Couldn't parse query parameter query - doesn't match schema: {e}")))
                                 .expect("Unable to create Bad Request response for invalid query parameter query")),
                         }
                     },
@@ -389,7 +414,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                     Some(param_query) => param_query,
                     None => return Ok(Response::builder()
                         .status(StatusCode::BAD_REQUEST)
-                        .body(Body::from("Missing required query parameter query"))
+                        .body(body_from_str("Missing required query parameter query"))
                         .expect("Unable to create Bad Request response for missing query parameter query")),
                 };
 
@@ -397,7 +422,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_query,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -420,7 +445,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -435,7 +460,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -450,7 +475,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -461,11 +486,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                             },
@@ -473,7 +497,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -496,12 +520,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_category) => param_category,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter category: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter category: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["category"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["category"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -509,7 +533,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_category,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -532,7 +556,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -547,7 +571,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -562,7 +586,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -573,11 +597,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                                 GetCategoryResponse::NotFound
@@ -594,7 +617,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -609,7 +632,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -624,7 +647,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -640,7 +663,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -659,16 +682,16 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                     );
 
                 let param_topic = match percent_encoding::percent_decode(path_params["topic"].as_bytes()).decode_utf8() {
-                    Ok(param_topic) => match param_topic.parse::<models::LibraryTopic>() {
+                    Ok(param_topic) => match param_topic.parse::<String>() {
                         Ok(param_topic) => param_topic,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter topic: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter topic: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["topic"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["topic"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -676,7 +699,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_topic,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -699,7 +722,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -714,7 +737,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -729,7 +752,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -740,11 +763,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                                 GetLibraryItemResponse::NotFound
@@ -761,7 +783,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -776,7 +798,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -791,7 +813,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -807,7 +829,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -830,12 +852,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_product_id_variant) => param_product_id_variant,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter productIdVariant: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter productIdVariant: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["productIdVariant"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["productIdVariant"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -844,12 +866,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_id) => param_id,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter id: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter id: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -866,7 +888,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             Ok(param_region) => Some(param_region),
                             Err(e) => return Ok(Response::builder()
                                 .status(StatusCode::BAD_REQUEST)
-                                .body(Body::from(format!("Couldn't parse query parameter region - doesn't match schema: {}", e)))
+                                .body(body_from_string(format!("Couldn't parse query parameter region - doesn't match schema: {e}")))
                                 .expect("Unable to create Bad Request response for invalid query parameter region")),
                         }
                     },
@@ -879,7 +901,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_region,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -902,7 +924,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -917,7 +939,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -932,7 +954,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -943,11 +965,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                                 GetAlternativesResponse::NotFound
@@ -964,7 +985,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -979,7 +1000,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -994,7 +1015,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1010,7 +1031,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -1033,12 +1054,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_organisation_id_variant) => param_organisation_id_variant,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter organisationIdVariant: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter organisationIdVariant: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["organisationIdVariant"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["organisationIdVariant"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -1047,12 +1068,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_id) => param_id,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter id: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter id: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -1061,7 +1082,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_id,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -1084,7 +1105,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1099,7 +1120,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1114,7 +1135,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1125,11 +1146,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                                 GetOrganisationResponse::NotFound
@@ -1146,7 +1166,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1161,7 +1181,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1176,7 +1196,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1192,7 +1212,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -1215,12 +1235,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_product_id_variant) => param_product_id_variant,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter productIdVariant: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter productIdVariant: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["productIdVariant"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["productIdVariant"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -1229,12 +1249,12 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                         Ok(param_id) => param_id,
                         Err(e) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't parse path parameter id: {}", e)))
+                                        .body(body_from_string(format!("Couldn't parse path parameter id: {e}")))
                                         .expect("Unable to create Bad Request response for invalid path parameter")),
                     },
                     Err(_) => return Ok(Response::builder()
                                         .status(StatusCode::BAD_REQUEST)
-                                        .body(Body::from(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
+                                        .body(body_from_string(format!("Couldn't percent-decode path parameter as UTF-8: {}", &path_params["id"])))
                                         .expect("Unable to create Bad Request response for invalid percent decode"))
                 };
 
@@ -1251,7 +1271,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                             Ok(param_region) => Some(param_region),
                             Err(e) => return Ok(Response::builder()
                                 .status(StatusCode::BAD_REQUEST)
-                                .body(Body::from(format!("Couldn't parse query parameter region - doesn't match schema: {}", e)))
+                                .body(body_from_string(format!("Couldn't parse query parameter region - doesn't match schema: {e}")))
                                 .expect("Unable to create Bad Request response for invalid query parameter region")),
                         }
                     },
@@ -1264,7 +1284,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                             param_region,
                                         &context
                                     ).await;
-                                let mut response = Response::new(Body::empty());
+                                let mut response = Response::new(BoxBody::new(http_body_util::Empty::new()));
                                 response.headers_mut().insert(
                                             HeaderName::from_static("x-span-id"),
                                             HeaderValue::from_str((&context as &dyn Has<XSpanIdString>).get().0.clone().as_str())
@@ -1287,7 +1307,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1302,7 +1322,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1317,7 +1337,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1328,11 +1348,10 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                     );
                                                     response.headers_mut().insert(
                                                         CONTENT_TYPE,
-                                                        HeaderValue::from_str("application/json")
-                                                            .expect("Unable to create Content-Type header for application/json"));
+                                                        HeaderValue::from_static("application/json"));
                                                     // JSON Body
                                                     let body = serde_json::to_string(&body).expect("impossible to fail to serialize");
-                                                    *response.body_mut() = Body::from(body);
+                                                    *response.body_mut() = body_from_string(body);
 
                                                 },
                                                 GetProductResponse::NotFound
@@ -1349,7 +1368,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_origin header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_origin header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1364,7 +1383,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_methods header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_methods header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1379,7 +1398,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                         Err(e) => {
                                                             return Ok(Response::builder()
                                                                     .status(StatusCode::INTERNAL_SERVER_ERROR)
-                                                                    .body(Body::from(format!("An internal server error occurred handling access_control_allow_headers header - {}", e)))
+                                                                    .body(body_from_string(format!("An internal server error occurred handling access_control_allow_headers header - {e}")))
                                                                     .expect("Unable to create Internal Server Error for invalid response header"))
                                                         }
                                                     };
@@ -1395,7 +1414,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
                                                 // Application code returned an error. This should not happen, as the implementation should
                                                 // return a valid response.
                                                 *response.status_mut() = StatusCode::INTERNAL_SERVER_ERROR;
-                                                *response.body_mut() = Body::from("An internal error occurred");
+                                                *response.body_mut() = body_from_str("An internal error occurred");
                                             },
                                         }
 
@@ -1411,7 +1430,7 @@ impl<T, C> hyper::service::Service<(Request<Body>, C)> for Service<T, C> where
             _ if path.matched(paths::ID_PRODUCT_PRODUCTIDVARIANT_ID_ALTERNATIVES) => method_not_allowed(),
             _ if path.matched(paths::ID_SEARCH_TEXT) => method_not_allowed(),
                 _ => Ok(Response::builder().status(StatusCode::NOT_FOUND)
-                        .body(Body::empty())
+                        .body(BoxBody::new(http_body_util::Empty::new()))
                         .expect("Unable to create Not Found response"))
             }
         }
