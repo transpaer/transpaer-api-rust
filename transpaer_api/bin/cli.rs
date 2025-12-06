@@ -28,7 +28,7 @@ type ClientContext = swagger::make_context_ty!(
 #[derive(Parser, Debug)]
 #[clap(
     name = "Transpaer",
-    version = "0.1.0",
+    version = "0.4.0",
     about = "CLI access to Transpaer"
 )]
 struct Cli {

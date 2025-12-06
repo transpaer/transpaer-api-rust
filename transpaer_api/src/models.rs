@@ -519,17 +519,7 @@ impl ::std::convert::TryFrom<::std::string::String> for CategoryStatus {
 #[doc = r" ```json"]
 #[doc = "{"]
 #[doc = "  \"description\": \"Describes where the related data was retrieved from.\","]
-#[doc = "  \"type\": \"string\","]
-#[doc = "  \"enum\": ["]
-#[doc = "    \"transpaer\","]
-#[doc = "    \"wiki\","]
-#[doc = "    \"off\","]
-#[doc = "    \"eu\","]
-#[doc = "    \"b_corp\","]
-#[doc = "    \"fti\","]
-#[doc = "    \"tco\","]
-#[doc = "    \"other\""]
-#[doc = "  ]"]
+#[doc = "  \"type\": \"string\""]
 #[doc = "}"]
 #[doc = r" ```"]
 #[doc = r" </details>"]
@@ -537,7 +527,6 @@ impl ::std::convert::TryFrom<::std::string::String> for CategoryStatus {
     :: serde :: Deserialize,
     :: serde :: Serialize,
     Clone,
-    Copy,
     Debug,
     Eq,
     Hash,
@@ -545,79 +534,38 @@ impl ::std::convert::TryFrom<::std::string::String> for CategoryStatus {
     PartialEq,
     PartialOrd,
 )]
-pub enum DataSource {
-    #[serde(rename = "transpaer")]
-    Transpaer,
-    #[serde(rename = "wiki")]
-    Wiki,
-    #[serde(rename = "off")]
-    Off,
-    #[serde(rename = "eu")]
-    Eu,
-    #[serde(rename = "b_corp")]
-    BCorp,
-    #[serde(rename = "fti")]
-    Fti,
-    #[serde(rename = "tco")]
-    Tco,
-    #[serde(rename = "other")]
-    Other,
+#[serde(transparent)]
+pub struct DataSource(pub ::std::string::String);
+impl ::std::ops::Deref for DataSource {
+    type Target = ::std::string::String;
+    fn deref(&self) -> &::std::string::String {
+        &self.0
+    }
 }
-impl ::std::convert::From<&Self> for DataSource {
+impl ::std::convert::From<DataSource> for ::std::string::String {
+    fn from(value: DataSource) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<&DataSource> for DataSource {
     fn from(value: &DataSource) -> Self {
         value.clone()
     }
 }
-impl ::std::fmt::Display for DataSource {
-    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
-        match *self {
-            Self::Transpaer => f.write_str("transpaer"),
-            Self::Wiki => f.write_str("wiki"),
-            Self::Off => f.write_str("off"),
-            Self::Eu => f.write_str("eu"),
-            Self::BCorp => f.write_str("b_corp"),
-            Self::Fti => f.write_str("fti"),
-            Self::Tco => f.write_str("tco"),
-            Self::Other => f.write_str("other"),
-        }
+impl ::std::convert::From<::std::string::String> for DataSource {
+    fn from(value: ::std::string::String) -> Self {
+        Self(value)
     }
 }
 impl ::std::str::FromStr for DataSource {
-    type Err = self::error::ConversionError;
-    fn from_str(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        match value {
-            "transpaer" => Ok(Self::Transpaer),
-            "wiki" => Ok(Self::Wiki),
-            "off" => Ok(Self::Off),
-            "eu" => Ok(Self::Eu),
-            "b_corp" => Ok(Self::BCorp),
-            "fti" => Ok(Self::Fti),
-            "tco" => Ok(Self::Tco),
-            "other" => Ok(Self::Other),
-            _ => Err("invalid value".into()),
-        }
+    type Err = ::std::convert::Infallible;
+    fn from_str(value: &str) -> ::std::result::Result<Self, Self::Err> {
+        Ok(Self(value.to_string()))
     }
 }
-impl ::std::convert::TryFrom<&str> for DataSource {
-    type Error = self::error::ConversionError;
-    fn try_from(value: &str) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<&::std::string::String> for DataSource {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: &::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
-    }
-}
-impl ::std::convert::TryFrom<::std::string::String> for DataSource {
-    type Error = self::error::ConversionError;
-    fn try_from(
-        value: ::std::string::String,
-    ) -> ::std::result::Result<Self, self::error::ConversionError> {
-        value.parse()
+impl ::std::fmt::Display for DataSource {
+    fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
+        self.0.fmt(f)
     }
 }
 #[doc = "Details of EU Ecolabel evaluation."]
