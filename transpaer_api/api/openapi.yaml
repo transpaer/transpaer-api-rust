@@ -3,7 +3,7 @@ info:
   description: |
     API for the transpaer backend
   title: Transpaer
-  version: 0.1.0
+  version: 0.4.0
 servers:
 - url: /
 paths:
@@ -618,14 +618,14 @@ components:
       example:
         images:
         - image: image
-          source: null
+          source: source
         - image: image
-          source: null
+          source: source
         names:
         - text: text
-          source: transpaer
+          source: source
         - text: text
-          source: transpaer
+          source: source
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
@@ -700,9 +700,9 @@ components:
           icon: icon
         descriptions:
         - text: text
-          source: null
+          source: source
         - text: text
-          source: null
+          source: source
         organisationIds:
           wiki:
           - null
@@ -735,7 +735,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
         - badges:
           - bcorp
           - bcorp
@@ -757,7 +757,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
       properties:
         organisationIds:
           $ref: "#/components/schemas/organisationIds"
@@ -832,42 +832,35 @@ components:
       description: Short text with its source.
       example:
         text: text
-        source: transpaer
+        source: source
       properties:
         text:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
         source:
-          $ref: "#/components/schemas/dataSource"
+          description: Describes where the related data was retrieved from.
+          type: string
       required:
       - source
       - text
       type: object
     dataSource:
       description: Describes where the related data was retrieved from.
-      enum:
-      - transpaer
-      - wiki
-      - "off"
-      - eu
-      - b_corp
-      - fti
-      - tco
-      - other
       type: string
     longText:
       description: Long text with its source.
       example:
         text: text
-        source: null
+        source: source
       properties:
         text:
           description: "Long string for descriptions, articles..."
           maxLength: 1048576
           type: string
         source:
-          $ref: "#/components/schemas/dataSource"
+          description: Describes where the related data was retrieved from.
+          type: string
       required:
       - source
       - text
@@ -876,12 +869,13 @@ components:
       description: Image path/URL with its source.
       example:
         image: image
-        source: null
+        source: source
       properties:
         image:
           type: string
         source:
-          $ref: "#/components/schemas/dataSource"
+          description: Describes where the related data was retrieved from.
+          type: string
       required:
       - image
       - source
@@ -946,7 +940,7 @@ components:
         name: name
         description:
           text: text
-          source: null
+          source: source
       properties:
         productIds:
           $ref: "#/components/schemas/productIds"
@@ -1235,14 +1229,14 @@ components:
       example:
         images:
         - image: image
-          source: null
+          source: source
         - image: image
-          source: null
+          source: source
         names:
         - text: text
-          source: transpaer
+          source: source
         - text: text
-          source: transpaer
+          source: source
         manufacturers:
         - badges:
           - bcorp
@@ -1255,7 +1249,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
           organisationIds:
             wiki:
             - null
@@ -1277,7 +1271,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
           organisationIds:
             wiki:
             - null
@@ -1379,7 +1373,7 @@ components:
             name: name
             description:
               text: text
-              source: null
+              source: source
           - badges:
             - bcorp
             - bcorp
@@ -1401,7 +1395,7 @@ components:
             name: name
             description:
               text: text
-              source: null
+              source: source
         - category_label: category_label
           category_id: category_id
           alternatives:
@@ -1426,7 +1420,7 @@ components:
             name: name
             description:
               text: text
-              source: null
+              source: source
           - badges:
             - bcorp
             - bcorp
@@ -1448,7 +1442,7 @@ components:
             name: name
             description:
               text: text
-              source: null
+              source: source
         media:
         - mentions:
           - link: link
@@ -1464,9 +1458,9 @@ components:
           icon: icon
         descriptions:
         - text: text
-          source: null
+          source: source
         - text: text
-          source: null
+          source: source
         shopping:
         - shop: fairphone
           link: link
@@ -1538,7 +1532,7 @@ components:
         name: name
         description:
           text: text
-          source: null
+          source: source
         organisationIds:
           wiki:
           - null
@@ -1599,7 +1593,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
         - badges:
           - bcorp
           - bcorp
@@ -1621,7 +1615,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
       properties:
         category_id:
           type: string
@@ -1702,7 +1696,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
         - badges:
           - bcorp
           - bcorp
@@ -1724,7 +1718,7 @@ components:
           name: name
           description:
             text: text
-            source: null
+            source: source
       properties:
         label:
           type: string
