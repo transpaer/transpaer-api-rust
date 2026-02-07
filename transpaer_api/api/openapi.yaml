@@ -3,7 +3,7 @@ info:
   description: |
     API for the transpaer backend
   title: Transpaer
-  version: 0.4.0
+  version: 0.5.0
 servers:
 - url: /
 paths:
@@ -622,10 +622,14 @@ components:
         - image: image
           source: source
         names:
-        - text: text
-          source: source
-        - text: text
-          source: source
+        - sources:
+          - sources
+          - sources
+          text: text
+        - sources:
+          - sources
+          - sources
+          text: text
         medallions:
         - euEcolabel:
             matchAccuracy: 0.6027456183070403
@@ -699,10 +703,14 @@ components:
             title: title
           icon: icon
         descriptions:
-        - text: text
-          source: source
-        - text: text
-          source: source
+        - sources:
+          - sources
+          - sources
+          text: text
+        - sources:
+          - sources
+          - sources
+          text: text
         organisationIds:
           wiki:
           - null
@@ -734,8 +742,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
         - badges:
           - bcorp
           - bcorp
@@ -756,8 +766,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
       properties:
         organisationIds:
           $ref: "#/components/schemas/organisationIds"
@@ -831,38 +843,48 @@ components:
     shortText:
       description: Short text with its source.
       example:
+        sources:
+        - sources
+        - sources
         text: text
-        source: source
       properties:
         text:
           description: "Short string for labels, titles, summaries..."
           maxLength: 1024
           type: string
-        source:
+        sources:
           description: Describes where the related data was retrieved from.
-          type: string
+          items:
+            type: string
+          type: array
       required:
-      - source
+      - sources
       - text
       type: object
-    dataSource:
+    dataSources:
       description: Describes where the related data was retrieved from.
-      type: string
+      items:
+        type: string
+      type: array
     longText:
       description: Long text with its source.
       example:
+        sources:
+        - sources
+        - sources
         text: text
-        source: source
       properties:
         text:
           description: "Long string for descriptions, articles..."
           maxLength: 1048576
           type: string
-        source:
+        sources:
           description: Describes where the related data was retrieved from.
-          type: string
+          items:
+            type: string
+          type: array
       required:
-      - source
+      - sources
       - text
       type: object
     image:
@@ -880,6 +902,9 @@ components:
       - image
       - source
       type: object
+    dataSource:
+      description: Describes where the related data was retrieved from.
+      type: string
     regionCode:
       description: Code of a region.
       maxLength: 3
@@ -939,8 +964,10 @@ components:
           scorerName: fti
         name: name
         description:
+          sources:
+          - sources
+          - sources
           text: text
-          source: source
       properties:
         productIds:
           $ref: "#/components/schemas/productIds"
@@ -1233,10 +1260,14 @@ components:
         - image: image
           source: source
         names:
-        - text: text
-          source: source
-        - text: text
-          source: source
+        - sources:
+          - sources
+          - sources
+          text: text
+        - sources:
+          - sources
+          - sources
+          text: text
         manufacturers:
         - badges:
           - bcorp
@@ -1248,8 +1279,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
           organisationIds:
             wiki:
             - null
@@ -1270,8 +1303,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
           organisationIds:
             wiki:
             - null
@@ -1372,8 +1407,10 @@ components:
               scorerName: fti
             name: name
             description:
+              sources:
+              - sources
+              - sources
               text: text
-              source: source
           - badges:
             - bcorp
             - bcorp
@@ -1394,8 +1431,10 @@ components:
               scorerName: fti
             name: name
             description:
+              sources:
+              - sources
+              - sources
               text: text
-              source: source
         - category_label: category_label
           category_id: category_id
           alternatives:
@@ -1419,8 +1458,10 @@ components:
               scorerName: fti
             name: name
             description:
+              sources:
+              - sources
+              - sources
               text: text
-              source: source
           - badges:
             - bcorp
             - bcorp
@@ -1441,8 +1482,10 @@ components:
               scorerName: fti
             name: name
             description:
+              sources:
+              - sources
+              - sources
               text: text
-              source: source
         media:
         - mentions:
           - link: link
@@ -1457,10 +1500,14 @@ components:
             title: title
           icon: icon
         descriptions:
-        - text: text
-          source: source
-        - text: text
-          source: source
+        - sources:
+          - sources
+          - sources
+          text: text
+        - sources:
+          - sources
+          - sources
+          text: text
         shopping:
         - shop: fairphone
           link: link
@@ -1531,8 +1578,10 @@ components:
           scorerName: fti
         name: name
         description:
+          sources:
+          - sources
+          - sources
           text: text
-          source: source
         organisationIds:
           wiki:
           - null
@@ -1592,8 +1641,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
         - badges:
           - bcorp
           - bcorp
@@ -1614,8 +1665,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
       properties:
         category_id:
           type: string
@@ -1695,8 +1748,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
         - badges:
           - bcorp
           - bcorp
@@ -1717,8 +1772,10 @@ components:
             scorerName: fti
           name: name
           description:
+            sources:
+            - sources
+            - sources
             text: text
-            source: source
       properties:
         label:
           type: string

@@ -143,35 +143,29 @@ fn main() {
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        /* Disabled because there's no example.
         Some("GetAlternatives") => {
             let result = rt.block_on(client.get_alternatives(
-                  ???,
+                  models::ProductIdVariant::Ean,
                   "id_example".to_string(),
                   Some("region_example".to_string())
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
-        /* Disabled because there's no example.
         Some("GetOrganisation") => {
             let result = rt.block_on(client.get_organisation(
-                  ???,
+                  models::OrganisationIdVariant::Wiki,
                   "id_example".to_string()
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
-        /* Disabled because there's no example.
         Some("GetProduct") => {
             let result = rt.block_on(client.get_product(
-                  ???,
+                  models::ProductIdVariant::Ean,
                   "id_example".to_string(),
                   Some("region_example".to_string())
             ));
             info!("{:?} (X-Span-ID: {:?})", result, (client.context() as &dyn Has<XSpanIdString>).get().clone());
         },
-        */
         _ => {
             panic!("Invalid operation provided")
         }
