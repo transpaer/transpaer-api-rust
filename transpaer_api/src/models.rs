@@ -568,6 +568,44 @@ impl ::std::fmt::Display for DataSource {
         self.0.fmt(f)
     }
 }
+#[doc = "Describes where the related data was retrieved from."]
+#[doc = r""]
+#[doc = r" <details><summary>JSON schema</summary>"]
+#[doc = r""]
+#[doc = r" ```json"]
+#[doc = "{"]
+#[doc = "  \"description\": \"Describes where the related data was retrieved from.\","]
+#[doc = "  \"type\": \"array\","]
+#[doc = "  \"items\": {"]
+#[doc = "    \"type\": \"string\""]
+#[doc = "  }"]
+#[doc = "}"]
+#[doc = r" ```"]
+#[doc = r" </details>"]
+#[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, PartialEq)]
+#[serde(transparent)]
+pub struct DataSources(pub ::std::vec::Vec<::std::string::String>);
+impl ::std::ops::Deref for DataSources {
+    type Target = ::std::vec::Vec<::std::string::String>;
+    fn deref(&self) -> &::std::vec::Vec<::std::string::String> {
+        &self.0
+    }
+}
+impl ::std::convert::From<DataSources> for ::std::vec::Vec<::std::string::String> {
+    fn from(value: DataSources) -> Self {
+        value.0
+    }
+}
+impl ::std::convert::From<&DataSources> for DataSources {
+    fn from(value: &DataSources) -> Self {
+        value.clone()
+    }
+}
+impl ::std::convert::From<::std::vec::Vec<::std::string::String>> for DataSources {
+    fn from(value: ::std::vec::Vec<::std::string::String>) -> Self {
+        Self(value)
+    }
+}
 #[doc = "Details of EU Ecolabel evaluation."]
 #[doc = r""]
 #[doc = r" <details><summary>JSON schema</summary>"]
@@ -1035,12 +1073,12 @@ impl<'de> ::serde::Deserialize<'de> for LongString {
 #[doc = "  \"description\": \"Long text with its source.\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
-#[doc = "    \"source\","]
+#[doc = "    \"sources\","]
 #[doc = "    \"text\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
-#[doc = "    \"source\": {"]
-#[doc = "      \"$ref\": \"#/$defs/dataSource\""]
+#[doc = "    \"sources\": {"]
+#[doc = "      \"$ref\": \"#/$defs/dataSources\""]
 #[doc = "    },"]
 #[doc = "    \"text\": {"]
 #[doc = "      \"$ref\": \"#/$defs/longString\""]
@@ -1051,7 +1089,7 @@ impl<'de> ::serde::Deserialize<'de> for LongString {
 #[doc = r" </details>"]
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, PartialEq)]
 pub struct LongText {
-    pub source: DataSource,
+    pub sources: DataSources,
     pub text: LongString,
 }
 impl ::std::convert::From<&LongText> for LongText {
@@ -2412,12 +2450,12 @@ impl<'de> ::serde::Deserialize<'de> for ShortString {
 #[doc = "  \"description\": \"Short text with its source.\","]
 #[doc = "  \"type\": \"object\","]
 #[doc = "  \"required\": ["]
-#[doc = "    \"source\","]
+#[doc = "    \"sources\","]
 #[doc = "    \"text\""]
 #[doc = "  ],"]
 #[doc = "  \"properties\": {"]
-#[doc = "    \"source\": {"]
-#[doc = "      \"$ref\": \"#/$defs/dataSource\""]
+#[doc = "    \"sources\": {"]
+#[doc = "      \"$ref\": \"#/$defs/dataSources\""]
 #[doc = "    },"]
 #[doc = "    \"text\": {"]
 #[doc = "      \"$ref\": \"#/$defs/shortString\""]
@@ -2428,7 +2466,7 @@ impl<'de> ::serde::Deserialize<'de> for ShortString {
 #[doc = r" </details>"]
 #[derive(:: serde :: Deserialize, :: serde :: Serialize, Clone, Debug, PartialEq)]
 pub struct ShortText {
-    pub source: DataSource,
+    pub sources: DataSources,
     pub text: ShortString,
 }
 impl ::std::convert::From<&ShortText> for ShortText {
@@ -3590,26 +3628,26 @@ pub mod builder {
     }
     #[derive(Clone, Debug)]
     pub struct LongText {
-        source: ::std::result::Result<super::DataSource, ::std::string::String>,
+        sources: ::std::result::Result<super::DataSources, ::std::string::String>,
         text: ::std::result::Result<super::LongString, ::std::string::String>,
     }
     impl ::std::default::Default for LongText {
         fn default() -> Self {
             Self {
-                source: Err("no value supplied for source".to_string()),
+                sources: Err("no value supplied for sources".to_string()),
                 text: Err("no value supplied for text".to_string()),
             }
         }
     }
     impl LongText {
-        pub fn source<T>(mut self, value: T) -> Self
+        pub fn sources<T>(mut self, value: T) -> Self
         where
-            T: ::std::convert::TryInto<super::DataSource>,
+            T: ::std::convert::TryInto<super::DataSources>,
             T::Error: ::std::fmt::Display,
         {
-            self.source = value
+            self.sources = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for source: {}", e));
+                .map_err(|e| format!("error converting supplied value for sources: {}", e));
             self
         }
         pub fn text<T>(mut self, value: T) -> Self
@@ -3627,7 +3665,7 @@ pub mod builder {
         type Error = super::error::ConversionError;
         fn try_from(value: LongText) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
-                source: value.source?,
+                sources: value.sources?,
                 text: value.text?,
             })
         }
@@ -3635,7 +3673,7 @@ pub mod builder {
     impl ::std::convert::From<super::LongText> for LongText {
         fn from(value: super::LongText) -> Self {
             Self {
-                source: Ok(value.source),
+                sources: Ok(value.sources),
                 text: Ok(value.text),
             }
         }
@@ -4934,26 +4972,26 @@ pub mod builder {
     }
     #[derive(Clone, Debug)]
     pub struct ShortText {
-        source: ::std::result::Result<super::DataSource, ::std::string::String>,
+        sources: ::std::result::Result<super::DataSources, ::std::string::String>,
         text: ::std::result::Result<super::ShortString, ::std::string::String>,
     }
     impl ::std::default::Default for ShortText {
         fn default() -> Self {
             Self {
-                source: Err("no value supplied for source".to_string()),
+                sources: Err("no value supplied for sources".to_string()),
                 text: Err("no value supplied for text".to_string()),
             }
         }
     }
     impl ShortText {
-        pub fn source<T>(mut self, value: T) -> Self
+        pub fn sources<T>(mut self, value: T) -> Self
         where
-            T: ::std::convert::TryInto<super::DataSource>,
+            T: ::std::convert::TryInto<super::DataSources>,
             T::Error: ::std::fmt::Display,
         {
-            self.source = value
+            self.sources = value
                 .try_into()
-                .map_err(|e| format!("error converting supplied value for source: {}", e));
+                .map_err(|e| format!("error converting supplied value for sources: {}", e));
             self
         }
         pub fn text<T>(mut self, value: T) -> Self
@@ -4973,7 +5011,7 @@ pub mod builder {
             value: ShortText,
         ) -> ::std::result::Result<Self, super::error::ConversionError> {
             Ok(Self {
-                source: value.source?,
+                sources: value.sources?,
                 text: value.text?,
             })
         }
@@ -4981,7 +5019,7 @@ pub mod builder {
     impl ::std::convert::From<super::ShortText> for ShortText {
         fn from(value: super::ShortText) -> Self {
             Self {
-                source: Ok(value.source),
+                sources: Ok(value.sources),
                 text: Ok(value.text),
             }
         }
