@@ -1,6 +1,6 @@
 [package]
 name = "transpaer-api"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["OpenAPI Generator team and contributors"]
 description = "API for the transpaer backend "
 # Override this license by providing a License Object in the OpenAPI.
